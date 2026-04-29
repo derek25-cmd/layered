@@ -194,20 +194,29 @@
   </div>
 </div>
 
-    {% else %}
-
-      <div class="max-w-md mx-auto text-center py-24 border border-dashed border-foreground/20">
-        <p class="font-display text-3xl mb-3">Sign in first</p>
-        <p class="text-sm text-muted-foreground mb-8">Your profile is only visible when you're logged in.</p>
-        <a href="{{ routes.account_login_url }}?return_to=/pages/profile" class="inline-block bg-foreground text-background text-xs uppercase tracking-widest px-8 py-3 hover:bg-foreground/80 transition-colors">
-          Sign in
-        </a>
-      </div>
-
-    {% endif %}
-
-  </div>
-</div>
+<style>
+  /* Fallback for arbitrary Tailwind classes not in layered-app.css */
+  .text-\[10px\] { font-size: 10px; }
+  .text-\[8px\] { font-size: 8px; }
+  .text-\[9px\] { font-size: 9px; }
+  .tracking-\[0.4em\] { letter-spacing: 0.4em; }
+  .tracking-\[0.2em\] { letter-spacing: 0.2em; }
+  .leading-\[0.9\] { line-height: 0.9; }
+  
+  .bg-white\/5 { background-color: rgba(255, 255, 255, 0.05); }
+  .bg-white\/10 { background-color: rgba(255, 255, 255, 0.1); }
+  .bg-white\/20 { background-color: rgba(255, 255, 255, 0.2); }
+  .bg-black\/5 { background-color: rgba(0, 0, 0, 0.05); }
+  .bg-black\/60 { background-color: rgba(0, 0, 0, 0.6); }
+  .bg-black\/95 { background-color: rgba(0, 0, 0, 0.95); }
+  
+  .border-white\/5 { border-color: rgba(255, 255, 255, 0.05); }
+  .border-white\/10 { border-color: rgba(255, 255, 255, 0.1); }
+  .border-white\/20 { border-color: rgba(255, 255, 255, 0.2); }
+  
+  .backdrop-blur-xl { backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+  .backdrop-blur-2xl { backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); }
+</style>
 
 <script>
 (function() {

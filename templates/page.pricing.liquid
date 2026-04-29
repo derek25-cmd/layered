@@ -142,7 +142,7 @@
         {% if customer and customer.tags contains 'Pro Member' %}
           <div class="w-full py-4 text-center text-[10px] uppercase tracking-[0.2em] font-bold bg-black/5 text-black">Current Membership</div>
         {% else %}
-          <a href="/cart/add?id={{ pro_product.first_available_variant.id }}&quantity=1&checkout=1" class="group/btn relative block w-full py-4 text-center text-[10px] uppercase tracking-[0.2em] font-bold bg-black text-white overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98]">
+          <a href="/cart/{{ pro_product.first_available_variant.id }}:1/checkout" class="group/btn relative block w-full py-4 text-center text-[10px] uppercase tracking-[0.2em] font-bold bg-black text-white overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98]">
             <span class="relative z-10">Upgrade Now</span>
           </a>
           <p class="text-center text-[9px] uppercase tracking-widest text-black/40 mt-6 font-semibold">Instant Access · Cancel Anytime</p>
@@ -204,10 +204,29 @@
   </div>
 </div>
 
-  </div>
-</div>
-
 <style>
+  /* Fallback for arbitrary Tailwind classes not in layered-app.css */
+  .text-\[10px\] { font-size: 10px; }
+  .text-\[8px\] { font-size: 8px; }
+  .text-\[9px\] { font-size: 9px; }
+  .tracking-\[0.4em\] { letter-spacing: 0.4em; }
+  .tracking-\[0.2em\] { letter-spacing: 0.2em; }
+  .leading-\[0.9\] { line-height: 0.9; }
+  
+  .bg-white\/5 { background-color: rgba(255, 255, 255, 0.05); }
+  .bg-white\/10 { background-color: rgba(255, 255, 255, 0.1); }
+  .bg-white\/20 { background-color: rgba(255, 255, 255, 0.2); }
+  .bg-black\/5 { background-color: rgba(0, 0, 0, 0.05); }
+  .bg-black\/60 { background-color: rgba(0, 0, 0, 0.6); }
+  .bg-black\/95 { background-color: rgba(0, 0, 0, 0.95); }
+  
+  .border-white\/5 { border-color: rgba(255, 255, 255, 0.05); }
+  .border-white\/10 { border-color: rgba(255, 255, 255, 0.1); }
+  .border-white\/20 { border-color: rgba(255, 255, 255, 0.2); }
+  
+  .backdrop-blur-xl { backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+  .backdrop-blur-2xl { backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); }
+
   .pr-faq summary {
     cursor: pointer;
     list-style: none;
