@@ -1,35 +1,155 @@
 {%- comment -%}
-  Customer Dashboard Orders replacing the old React SPA component
+  Customer Dashboard — Order History
+  Shows order images, statuses, totals, and per-line-item details.
 {%- endcomment -%}
 
-<div class="customer-dashboard max-w-6xl mx-auto py-6 md:py-10 px-4">
-  <h1 class="text-2xl md:text-3xl font-bold mb-6 md:mb-8">My Orders</h1>
-  
+<div class="customer-dashboard max-w-5xl mx-auto py-8 md:py-12 px-4">
+
+  {%- comment -%} ── Header ── {%- endcomment -%}
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 md:mb-10">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold">
+        Hello, {{ customer.first_name }}
+      </h1>
+      <p class="text-sm text-gray-500 mt-1">{{ customer.email }}</p>
+    </div>
+    <a
+      href="{{ routes.account_logout_url }}"
+      class="inline-block text-sm border border-gray-300 rounded-lg px-4 py-2 hover:border-black transition-colors self-start sm:self-auto"
+    >
+      Sign out
+    </a>
+  </div>
+
+  {%- comment -%} ── Account nav tabs ── {%- endcomment -%}
+  <div class="flex gap-1 border-b mb-8">
+    <span class="px-4 py-2 text-sm font-semibold border-b-2 border-black -mb-px">Orders</span>
+    <a href="{{ routes.account_addresses_url }}" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition-colors">Addresses</a>
+  </div>
+
+  {%- comment -%} ── Order list ── {%- endcomment -%}
   {% if customer.orders.size > 0 %}
-    <div class="grid gap-6">
+
+    <div class="space-y-6">
       {% for order in customer.orders %}
-        <div class="order-card border rounded-lg p-4 md:p-6 shadow-sm flex flex-col md:flex-row justify-between bg-white gap-4">
-          <div class="order-info">
-            <h3 class="text-lg md:text-xl font-semibold">Order {{ order.name }}</h3>
-            <p class="text-gray-500 text-sm">{{ order.created_at | date: "%B %d, %Y" }}</p>
-            <div class="mt-2">
-              <span class="inline-block px-3 py-1 bg-gray-100 rounded-full text-xs font-medium">{{ order.financial_status_label }}</span>
-              <span class="inline-block px-3 py-1 bg-gray-100 rounded-full text-xs font-medium ml-2">{{ order.fulfillment_status_label }}</span>
+
+        {%- comment -%} Status badge colour logic {%- endcomment -%}
+        {%- assign fin_status = order.financial_status -%}
+        {%- assign ful_status = order.fulfillment_status -%}
+
+        {%- assign fin_colour = 'bg-gray-100 text-gray-700' -%}
+        {%- if fin_status == 'paid' -%}
+          {%- assign fin_colour = 'bg-green-100 text-green-800' -%}
+        {%- elsif fin_status == 'pending' or fin_status == 'authorized' -%}
+          {%- assign fin_colour = 'bg-yellow-100 text-yellow-800' -%}
+        {%- elsif fin_status == 'refunded' or fin_status == 'voided' -%}
+          {%- assign fin_colour = 'bg-red-100 text-red-700' -%}
+        {%- endif -%}
+
+        {%- assign ful_colour = 'bg-gray-100 text-gray-700' -%}
+        {%- if ful_status == 'fulfilled' -%}
+          {%- assign ful_colour = 'bg-blue-100 text-blue-800' -%}
+        {%- elsif ful_status == 'partial' -%}
+          {%- assign ful_colour = 'bg-orange-100 text-orange-800' -%}
+        {%- endif -%}
+
+        <div class="order-card border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm">
+
+          {%- comment -%} Order header bar {%- endcomment -%}
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4 bg-gray-50 border-b border-gray-200">
+            <div class="flex flex-wrap items-center gap-3">
+              <span class="font-semibold text-sm">Order {{ order.name }}</span>
+              <span class="text-xs text-gray-500">{{ order.created_at | date: "%B %d, %Y" }}</span>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ fin_colour }}">
+                {{ order.financial_status_label }}
+              </span>
+              {% if ful_status != blank %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ ful_colour }}">
+                  {{ order.fulfillment_status_label }}
+                </span>
+              {% endif %}
             </div>
-            <p class="font-bold mt-4">Total: {{ order.total_net_amount | money }}</p>
+            <div class="flex items-center gap-4 flex-shrink-0">
+              <span class="font-bold text-sm">{{ order.total_net_amount | money }}</span>
+              <a
+                href="{{ order.customer_url }}"
+                class="text-xs font-medium border border-gray-300 rounded-lg px-3 py-1.5 hover:border-black transition-colors whitespace-nowrap"
+              >
+                View details
+              </a>
+            </div>
           </div>
-          
-          <div class="order-items flex gap-2 overflow-x-auto">
+
+          {%- comment -%} Line items with thumbnails {%- endcomment -%}
+          <div class="divide-y divide-gray-100">
             {% for line_item in order.line_items %}
-              <div class="w-20 h-20 flex-shrink-0 border rounded overflow-hidden">
-                <img src="{{ line_item.image | image_url: width: 150 }}" alt="{{ line_item.title }}" class="w-full h-full object-cover">
+              <div class="flex items-start gap-4 px-5 py-4">
+
+                {%- comment -%} Product image {%- endcomment -%}
+                <div class="w-16 h-20 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+                  {% if line_item.image %}
+                    <img
+                      src="{{ line_item.image | image_url: width: 160 }}"
+                      alt="{{ line_item.title | escape }}"
+                      class="w-full h-full object-cover"
+                      loading="lazy"
+                    >
+                  {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-gray-300">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                  {% endif %}
+                </div>
+
+                {%- comment -%} Item details {%- endcomment -%}
+                <div class="flex-1 min-w-0">
+                  <p class="font-medium text-sm leading-snug">{{ line_item.title }}</p>
+                  {% if line_item.variant_title and line_item.variant_title != 'Default Title' %}
+                    <p class="text-xs text-gray-500 mt-0.5">{{ line_item.variant_title }}</p>
+                  {% endif %}
+                  <p class="text-xs text-gray-500 mt-1">Qty: {{ line_item.quantity }}</p>
+                </div>
+
+                {%- comment -%} Line price {%- endcomment -%}
+                <div class="flex-shrink-0 text-right">
+                  <p class="text-sm font-medium">{{ line_item.final_line_price | money }}</p>
+                  {% if line_item.original_line_price != line_item.final_line_price %}
+                    <p class="text-xs text-gray-400 line-through">{{ line_item.original_line_price | money }}</p>
+                  {% endif %}
+                </div>
+
               </div>
             {% endfor %}
           </div>
+
+          {%- comment -%} Shipping address (if present) {%- endcomment -%}
+          {% if order.shipping_address %}
+            <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 text-xs text-gray-500">
+              <span class="font-medium text-gray-700">Shipped to:</span>
+              {{ order.shipping_address.first_name }} {{ order.shipping_address.last_name }},
+              {{ order.shipping_address.city }},
+              {{ order.shipping_address.country }}
+            </div>
+          {% endif %}
+
         </div>
       {% endfor %}
     </div>
+
   {% else %}
-    <p class="text-gray-600">You haven't placed any orders yet.</p>
+
+    <div class="text-center py-20 border border-dashed border-gray-200 rounded-xl">
+      <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+      <p class="text-gray-600 font-medium mb-2">No orders yet</p>
+      <p class="text-sm text-gray-500 mb-6">When you place an order it will appear here.</p>
+      <a
+        href="{{ routes.all_products_collection_url }}"
+        class="inline-block bg-black text-white font-bold px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors text-sm"
+      >
+        Start Shopping
+      </a>
+    </div>
+
   {% endif %}
+
 </div>

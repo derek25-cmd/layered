@@ -1,3 +1,113 @@
 {%- comment -%}
-  Search handled by React SPA.
+  Native Shopify Search Results Template
+  - Hides products tagged 'Service' and handle 'layered-pro-plan'
+  - Separates product results from page/article results
 {%- endcomment -%}
+
+<div class="search-page container mx-auto py-8 md:py-12 px-4 max-w-5xl">
+
+  {%- comment -%} ── Search form ── {%- endcomment -%}
+  <div class="mb-8 md:mb-10">
+    {% form 'search', class: 'flex gap-2' %}
+      <input
+        type="search"
+        name="q"
+        value="{{ search.terms | escape }}"
+        placeholder="Search products…"
+        class="flex-1 border-2 border-gray-200 rounded-lg px-4 py-3 text-sm focus:border-black outline-none transition-colors"
+        aria-label="Search query"
+      >
+      <button
+        type="submit"
+        class="bg-black text-white font-bold px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors text-sm"
+      >
+        Search
+      </button>
+    {% endform %}
+  </div>
+
+  {% if search.performed %}
+
+    {%- comment -%} Filter results — exclude Pro Plan from product results {%- endcomment -%}
+    {%- assign product_results = '' -%}
+    {%- assign other_results = '' -%}
+    {%- assign product_count = 0 -%}
+
+    <h1 class="text-xl md:text-2xl font-bold mb-6">
+      {% if search.results_count == 0 %}
+        No results for &ldquo;{{ search.terms | escape }}&rdquo;
+      {% else %}
+        Results for &ldquo;{{ search.terms | escape }}&rdquo;
+      {% endif %}
+    </h1>
+
+    {% if search.results_count > 0 %}
+
+      {%- comment -%} Product results grid {%- endcomment -%}
+      <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
+        {% for item in search.results %}
+          {% if item.object_type == 'product' %}
+            {%- comment -%} Skip Pro Plan and any Service-tagged product {%- endcomment -%}
+            {% unless item.tags contains 'Service' or item.handle == 'layered-pro-plan' %}
+              {%- assign product_count = product_count | plus: 1 -%}
+              <div class="product-card group">
+                <a href="{{ item.url }}" class="block">
+                  <div class="aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden mb-3">
+                    {% if item.featured_image %}
+                      <img
+                        src="{{ item.featured_image | image_url: width: 600 }}"
+                        alt="{{ item.title | escape }}"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      >
+                    {% else %}
+                      <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No image</div>
+                    {% endif %}
+                  </div>
+                  <h3 class="font-medium text-sm md:text-base leading-snug">{{ item.title }}</h3>
+                  <p class="text-sm text-gray-600 mt-0.5">{{ item.price | money }}</p>
+                </a>
+              </div>
+            {% endunless %}
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      {% if product_count == 0 %}
+        <p class="text-gray-500 mb-10">No products matched your search.</p>
+      {% endif %}
+
+      {%- comment -%} Page / article results {%- endcomment -%}
+      {%- assign has_other = false -%}
+      {% for item in search.results %}
+        {% unless item.object_type == 'product' %}
+          {%- assign has_other = true -%}
+        {% endunless %}
+      {% endfor %}
+
+      {% if has_other %}
+        <div class="border-t pt-8">
+          <h2 class="text-lg font-bold mb-4">Pages &amp; Articles</h2>
+          <ul class="space-y-4">
+            {% for item in search.results %}
+              {% unless item.object_type == 'product' %}
+                <li class="border-b pb-4">
+                  <a href="{{ item.url }}" class="font-medium hover:underline">{{ item.title }}</a>
+                  {% if item.description != blank %}
+                    <p class="text-sm text-gray-600 mt-1">{{ item.description | strip_html | truncate: 150 }}</p>
+                  {% endif %}
+                </li>
+              {% endunless %}
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+    {% endif %}
+
+  {% else %}
+    {%- comment -%} Search not yet performed — show prompt {%- endcomment -%}
+    <p class="text-gray-500 text-center py-12">Enter a term above to search our store.</p>
+  {% endif %}
+
+</div>

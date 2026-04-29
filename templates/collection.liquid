@@ -1,64 +1,227 @@
 {%- comment -%}
   Shopify Native Collection Template
+  - Category tabs mirror the React Ba() categorisation function from layered-app.js
+  - Sorting uses Shopify's native ?sort_by= URL parameter
+  - Pro Plan (tag:Service / handle:layered-pro-plan) is excluded everywhere
+  - Outfits section shown on every collection, sourced from the 'outfits' collection
 {%- endcomment -%}
 
-<div class="collection-page container mx-auto py-6 md:py-10 px-4">
-  <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 md:mb-8 text-center">{{ collection.title | default: 'Shop' }}</h1>
+{%- assign outfit_collection = collections['outfits'] -%}
 
-  {%- comment -%}
-    OUTFIT CATEGORIZATION (Feature 2)
-    This creates a segregated Outfits section on the main shop collection page.
-  {%- endcomment -%}
-  {% if collection.handle == 'all' or collection.handle == 'frontpage' %}
-    <div class="outfits-section py-8 md:py-12 mb-8 md:mb-10 border-b">
-      <h2 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">Curated Outfits</h2>
+<div class="collection-page container mx-auto py-6 md:py-10 px-4">
+
+  {%- comment -%} ── Page title ── {%- endcomment -%}
+  <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 md:mb-8 text-center">
+    {{ collection.title | default: 'Shop' }}
+  </h1>
+
+  {%- comment -%} ── Curated Outfits section (shown whenever 'outfits' collection has products) ── {%- endcomment -%}
+  {% if outfit_collection and outfit_collection.products.size > 0 %}
+    <div class="outfits-section py-8 md:py-10 mb-8 md:mb-10 border-b">
+      <div class="flex items-center justify-between mb-4 md:mb-6">
+        <h2 class="text-xl md:text-2xl font-bold">Curated Outfits</h2>
+        <a href="{{ outfit_collection.url }}" class="text-sm font-medium underline underline-offset-2 hover:opacity-70 transition-opacity">
+          View all
+        </a>
+      </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        {% assign outfit_collection = collections['outfits'] %}
         {% for outfit_product in outfit_collection.products limit: 4 %}
-          <div class="outfit-card group cursor-pointer hover-lift relative overflow-hidden rounded-lg">
-            <a href="{{ outfit_product.url }}">
-              <div class="aspect-[3/4] bg-gray-100 overflow-hidden">
-                <img src="{{ outfit_product.featured_image | image_url: width: 600 }}" alt="{{ outfit_product.title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-              </div>
-              <div class="p-4 bg-white">
-                <h3 class="font-semibold text-lg">{{ outfit_product.title }}</h3>
-                <p class="text-gray-600 mt-1">{{ outfit_product.price | money }}</p>
-              </div>
-            </a>
-          </div>
-        {% else %}
-          <p class="text-gray-500 italic">No curated outfits available right now. Please check back soon.</p>
+          <a href="{{ outfit_product.url }}" class="outfit-card group relative overflow-hidden rounded-lg bg-gray-100 block">
+            <div class="aspect-[3/4] overflow-hidden">
+              {% if outfit_product.featured_image %}
+                <img
+                  src="{{ outfit_product.featured_image | image_url: width: 600 }}"
+                  alt="{{ outfit_product.title | escape }}"
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                >
+              {% else %}
+                <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <span class="text-gray-400 text-xs">No image</span>
+                </div>
+              {% endif %}
+            </div>
+            <div class="p-3 bg-white">
+              <h3 class="font-semibold text-sm md:text-base leading-tight">{{ outfit_product.title }}</h3>
+              <p class="text-gray-600 text-sm mt-1">{{ outfit_product.price | money }}</p>
+            </div>
+          </a>
         {% endfor %}
       </div>
     </div>
   {% endif %}
 
-  {%- comment -%}
-    STANDARD PRODUCT GRID
-    Hiding the Layered Pro Plan using tags or handle (Feature 2)
-  {%- endcomment -%}
-  <h2 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">All Products</h2>
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+  {%- comment -%} ── Filter tabs + Sort bar ── {%- endcomment -%}
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
+
+    {%- comment -%} Category filter buttons — JS shows/hides cards by data-category {%- endcomment -%}
+    <div class="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+      {% assign categories = 'All,Tops,Bottoms,Shoes,Outerwear,Accessories' | split: ',' %}
+      {% for cat in categories %}
+        <button
+          type="button"
+          class="filter-btn px-4 py-1.5 rounded-full border text-sm font-medium transition-colors
+            {% if forloop.first %}bg-black text-white border-black{% else %}bg-white text-gray-700 border-gray-300 hover:border-black{% endif %}"
+          data-filter="{{ cat }}"
+          aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+        >
+          {{ cat }}
+        </button>
+      {% endfor %}
+    </div>
+
+    {%- comment -%} Sort — native Shopify ?sort_by= (page reload, no JS needed) {%- endcomment -%}
+    <div class="flex items-center gap-2 flex-shrink-0">
+      <label for="sort-select" class="text-sm text-gray-600 whitespace-nowrap">Sort by</label>
+      <select
+        id="sort-select"
+        class="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:border-black outline-none bg-white"
+        onchange="window.location.href = window.location.pathname + '?sort_by=' + this.value"
+      >
+        <option value="manual"           {% if collection.sort_by == 'manual' %}selected{% endif %}>Featured</option>
+        <option value="best-selling"     {% if collection.sort_by == 'best-selling' %}selected{% endif %}>Best Selling</option>
+        <option value="price-ascending"  {% if collection.sort_by == 'price-ascending' %}selected{% endif %}>Price: Low → High</option>
+        <option value="price-descending" {% if collection.sort_by == 'price-descending' %}selected{% endif %}>Price: High → Low</option>
+        <option value="created-descending" {% if collection.sort_by == 'created-descending' %}selected{% endif %}>Newest</option>
+        <option value="title-ascending"  {% if collection.sort_by == 'title-ascending' %}selected{% endif %}>A → Z</option>
+      </select>
+    </div>
+
+  </div>
+
+  {%- comment -%} ── Product grid ── {%- endcomment -%}
+  {% paginate collection.products by 24 %}
+
+    {%- comment -%} Count visible (non-Pro-Plan) products for the empty state {%- endcomment -%}
+    {%- assign visible_count = 0 -%}
     {% for product in collection.products %}
       {% unless product.tags contains 'Service' or product.handle == 'layered-pro-plan' %}
-        <div class="product-card group relative">
-          <a href="{{ product.url }}">
-            <div class="aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden mb-3">
-              <img src="{{ product.featured_image | image_url: width: 600 }}" alt="{{ product.title }}" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
-            </div>
-            <h3 class="font-medium">{{ product.title }}</h3>
-            <p class="text-sm text-gray-600">{{ product.price | money }}</p>
-          </a>
-        </div>
+        {%- assign visible_count = visible_count | plus: 1 -%}
       {% endunless %}
-    {% else %}
-      <p class="col-span-full text-center text-gray-500">No products found in this collection.</p>
     {% endfor %}
-  </div>
-  
-  {% if paginate.pages > 1 %}
-    <div class="pagination flex justify-center mt-10">
-      {{ paginate | default_pagination }}
-    </div>
-  {% endif %}
+
+    {% if visible_count == 0 %}
+      <p class="col-span-full text-center text-gray-500 py-16">No products found in this collection.</p>
+    {% else %}
+
+      <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        {% for product in collection.products %}
+          {% unless product.tags contains 'Service' or product.handle == 'layered-pro-plan' %}
+
+            {%- comment -%}
+              Determine category using the same regex rules as the React Ba() function:
+              shoes → sneaker → boot → heel → sandal → loafer  → "Shoes"
+              pant  → jean    → trouser → short → skirt → bottom → "Bottoms"
+              jacket → coat   → outer  → blazer → parka         → "Outerwear"
+              hat   → bag     → belt   → scarf  → sunglass → jewel → access → "Accessories"
+              everything else → "Tops"
+            {%- endcomment -%}
+            {%- assign raw = product.product_type | append: ' ' | append: product.title | downcase -%}
+            {%- assign tag_string = product.tags | join: ' ' | downcase -%}
+            {%- assign raw = raw | append: ' ' | append: tag_string -%}
+
+            {%- assign category = 'Tops' -%}
+            {%- if raw contains 'shoe' or raw contains 'sneaker' or raw contains 'boot' or raw contains 'heel' or raw contains 'sandal' or raw contains 'loafer' -%}
+              {%- assign category = 'Shoes' -%}
+            {%- elsif raw contains 'pant' or raw contains 'jean' or raw contains 'trouser' or raw contains 'short' or raw contains 'skirt' or raw contains 'bottom' -%}
+              {%- assign category = 'Bottoms' -%}
+            {%- elsif raw contains 'jacket' or raw contains 'coat' or raw contains 'outer' or raw contains 'blazer' or raw contains 'parka' -%}
+              {%- assign category = 'Outerwear' -%}
+            {%- elsif raw contains 'hat' or raw contains 'bag' or raw contains 'belt' or raw contains 'scarf' or raw contains 'sunglass' or raw contains 'jewel' or raw contains 'access' -%}
+              {%- assign category = 'Accessories' -%}
+            {%- endif -%}
+
+            <div class="product-card group relative" data-category="{{ category }}">
+              <a href="{{ product.url }}" class="block">
+                <div class="aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden mb-3 relative">
+                  {% if product.featured_image %}
+                    <img
+                      src="{{ product.featured_image | image_url: width: 600 }}"
+                      alt="{{ product.title | escape }}"
+                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    >
+                  {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No image</div>
+                  {% endif %}
+                  {% unless product.available %}
+                    <span class="absolute top-2 left-2 bg-gray-800 text-white text-xs font-medium px-2 py-1 rounded">
+                      Sold Out
+                    </span>
+                  {% endunless %}
+                </div>
+                <p class="text-xs text-gray-400 uppercase tracking-wider mb-0.5">{{ category }}</p>
+                <h3 class="font-medium text-sm md:text-base leading-snug">{{ product.title }}</h3>
+                <p class="text-sm text-gray-600 mt-0.5">
+                  {% if product.compare_at_price > product.price %}
+                    <span class="line-through text-gray-400 mr-1">{{ product.compare_at_price | money }}</span>
+                    <span class="text-red-600">{{ product.price | money }}</span>
+                  {% else %}
+                    {{ product.price | money }}
+                  {% endif %}
+                </p>
+              </a>
+            </div>
+
+          {% endunless %}
+        {% endfor %}
+      </div>
+
+    {% endif %}
+
+    {% if paginate.pages > 1 %}
+      <div class="pagination flex justify-center mt-10 gap-2">
+        {{ paginate | default_pagination }}
+      </div>
+    {% endif %}
+
+  {% endpaginate %}
+
 </div>
+
+{%- comment -%} ── Category filter script ── {%- endcomment -%}
+<script>
+(function () {
+  const buttons = document.querySelectorAll('.filter-btn');
+  const cards   = document.querySelectorAll('#product-grid .product-card');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.dataset.filter;
+
+      // Update button active state
+      buttons.forEach(b => {
+        const active = b === btn;
+        b.classList.toggle('bg-black',    active);
+        b.classList.toggle('text-white',  active);
+        b.classList.toggle('border-black', active);
+        b.classList.toggle('bg-white',    !active);
+        b.classList.toggle('text-gray-700', !active);
+        b.classList.toggle('border-gray-300', !active);
+        b.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+
+      // Show/hide product cards
+      let visibleCount = 0;
+      cards.forEach(card => {
+        const show = filter === 'All' || card.dataset.category === filter;
+        card.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+      });
+
+      // Empty state message
+      const grid = document.getElementById('product-grid');
+      const existingMsg = document.getElementById('filter-empty-msg');
+      if (visibleCount === 0 && !existingMsg) {
+        const msg = document.createElement('p');
+        msg.id = 'filter-empty-msg';
+        msg.className = 'col-span-full text-center text-gray-500 py-12';
+        msg.textContent = 'No ' + filter + ' products found.';
+        grid.appendChild(msg);
+      } else if (visibleCount > 0 && existingMsg) {
+        existingMsg.remove();
+      }
+    });
+  });
+})();
+</script>

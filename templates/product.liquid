@@ -128,6 +128,16 @@
           <div class="aspect-[3/4] rounded-lg overflow-hidden border shadow-sm">
             <img id="vto-result-image" src="" alt="Virtual Try-On Result" class="w-full h-full object-cover">
           </div>
+          <div class="mt-3 flex items-center justify-between gap-3">
+            <p id="vto-quota" class="hidden text-xs text-gray-500"></p>
+            <button
+              id="vto-download-btn"
+              type="button"
+              class="hidden ml-auto text-xs font-medium border border-gray-300 rounded-lg px-4 py-2 hover:border-black transition-colors"
+            >
+              Download image
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -271,37 +281,97 @@
   })();
 
   // ─── Virtual Try-On ───────────────────────────────────────────────────────
-  const vtoFileInput     = document.getElementById('vto-user-image');
-  const vtoBtn           = document.getElementById('vto-generate-btn');
-  const vtoLoading       = document.getElementById('vto-loading');
-  const vtoResultWrap    = document.getElementById('vto-result-container');
-  const vtoResultImg     = document.getElementById('vto-result-image');
-  const VTO_ENDPOINT     = 'https://your-project.supabase.co/functions/v1/virtual-try-on';
+  // ─── Virtual Try-On ───────────────────────────────────────────────────────
+  // Mirrors the React VTO implementation: converts photo to base64,
+  // sends {photo, outfit} JSON to the Supabase Edge Function,
+  // and handles quota + download response exactly as the React app does.
+  const SUPABASE_URL      = 'https://drlaxsqimrggptkbqcsh.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybGF4c3FpbXJnZ3B0a2JxY3NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MjAzNTksImV4cCI6MjA5MjI5NjM1OX0.vHITjEzVFWAali7J_MKENGsAi5GRrYnFAzwE8ySpYSY';
+  const VTO_ENDPOINT      = SUPABASE_URL + '/functions/v1/virtual-tryon';
+
+  const PRODUCT_TITLE = {{ product.title | json }};
+  const PRODUCT_TYPE  = {{ product.product_type | json }};
+
+  const vtoFileInput   = document.getElementById('vto-user-image');
+  const vtoBtn         = document.getElementById('vto-generate-btn');
+  const vtoLoading     = document.getElementById('vto-loading');
+  const vtoResultWrap  = document.getElementById('vto-result-container');
+  const vtoResultImg   = document.getElementById('vto-result-image');
+  const vtoDownloadBtn = document.getElementById('vto-download-btn');
+  const vtoQuotaEl     = document.getElementById('vto-quota');
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = e => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
 
   if (vtoBtn) {
     vtoBtn.addEventListener('click', async () => {
+      const isLoggedIn = window.__SHOPIFY_CONTEXT__ && window.__SHOPIFY_CONTEXT__.isLoggedIn;
+      if (!isLoggedIn) {
+        alert('Please sign in to use the AI Virtual Try-On.');
+        window.location.href = '/account/login';
+        return;
+      }
       if (!vtoFileInput.files || !vtoFileInput.files.length) {
         alert('Please upload your photo first.');
         return;
       }
+
       vtoBtn.disabled = true;
       vtoLoading.classList.remove('hidden');
       vtoResultWrap.classList.add('hidden');
 
       try {
-        const body = new FormData();
-        body.append('user_image', vtoFileInput.files[0]);
-        body.append('product_image_url', mainImage.src);
+        const photoBase64 = await fileToBase64(vtoFileInput.files[0]);
 
-        const res  = await fetch(VTO_ENDPOINT, { method: 'POST', body });
-        if (!res.ok) throw new Error('Generation failed');
+        const res = await fetch(VTO_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            photo: photoBase64,
+            outfit: [{
+              label: PRODUCT_TYPE || PRODUCT_TITLE,
+              title: PRODUCT_TITLE,
+              image: mainImage.src
+            }]
+          })
+        });
+
         const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Generation failed');
+        if (!data.image)  throw new Error('No image returned from server');
 
-        vtoResultImg.src = data.image_url;
+        vtoResultImg.src = data.image;
         vtoResultWrap.classList.remove('hidden');
+
+        // Show remaining quota if the function returns it
+        if (vtoQuotaEl && data.quota != null) {
+          vtoQuotaEl.textContent = data.quota + ' generations remaining';
+          vtoQuotaEl.classList.remove('hidden');
+        }
+
+        // Wire up download button
+        if (vtoDownloadBtn) {
+          vtoDownloadBtn.classList.remove('hidden');
+          vtoDownloadBtn.onclick = () => {
+            const a    = document.createElement('a');
+            a.href     = data.image;
+            a.download = 'layered-tryon.png';
+            a.click();
+          };
+        }
+
       } catch (err) {
         console.error('VTO error:', err);
-        alert('An error occurred. Please try again.');
+        alert(err.message || 'An error occurred. Please try again.');
       } finally {
         vtoBtn.disabled = false;
         vtoLoading.classList.add('hidden');
