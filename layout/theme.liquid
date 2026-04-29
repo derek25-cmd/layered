@@ -6,28 +6,26 @@
     <title>{{ page_title }} — {{ shop.name }}</title>
     <meta name="description" content="{{ page_description | escape }}" />
 
-    {%- comment -%} Shopify required tags {%- endcomment -%}
     {{ content_for_header }}
 
-    {%- comment -%} Favicon {%- endcomment -%}
     <link rel="icon" type="image/x-icon" href="{{ 'favicon.ico' | asset_url }}" />
 
-    {%- comment -%} Google Fonts used by Layered {%- endcomment -%}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
-    {%- comment -%} Layered app CSS — loaded on all pages for consistent typography and utilities {%- endcomment -%}
     {{ 'layered-app.css' | asset_url | stylesheet_tag }}
 
     {%- comment -%}
-      Determine whether this page is a Shopify-native template that manages
-      its own full layout (customer auth, collection, product, search).
-      On these pages we suppress the React SPA so it cannot cover the
-      Shopify-rendered content or intercept auth callbacks.
+      is_native_page: true on any template where the React SPA must NOT mount.
+      ─────────────────────────────────────────────────────────────────────────
+      IMPORTANT: Shopify's template.name strips the directory component, so
+      template.name for templates/customers/login.liquid is "login" — NOT
+      "customers/login".  Use template.directory == 'customers' instead,
+      which reliably returns "customers" for every file in that folder.
     {%- endcomment -%}
     {%- assign is_native_page = false -%}
-    {%- if template.name contains 'customers/'
+    {%- if template.directory == 'customers'
         or template.name == 'collection'
         or template.name == 'product'
         or template.name == 'search'
@@ -46,43 +44,30 @@
         -moz-osx-font-smoothing: grayscale;
         overflow-x: hidden;
       }
+
       {% unless is_native_page %}
       #root {
         min-height: 100vh;
         overflow-x: hidden;
       }
-      /* Hide Shopify's default header/footer — the React SPA has its own */
       .shopify-section-group-header-group,
       .shopify-section-group-footer-group {
         display: none !important;
       }
       {% endunless %}
-      img  { max-width: 100%; height: auto; }
-      *    { box-sizing: border-box; }
-      table {
-        width: 100%;
-        display: block;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
+
+      img   { max-width: 100%; height: auto; }
+      *     { box-sizing: border-box; }
+      table { width: 100%; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
       {% if is_native_page %}
-      /* ── Native-page styles ───────────────────────────────────────────────
-         Clean, minimal chrome for Shopify-rendered pages (login, account,
-         collections, products, search). No React navbar/footer needed here
-         because content_for_layout provides the full page content.
-      */
       body { background: #fff; color: #111; }
-      a    { color: inherit; }
+      a    { color: inherit; text-decoration: none; }
       {% endif %}
     </style>
   </head>
 
   <body>
-    {%- comment -%}
-      Inject Shopify context so both the React SPA and native-page scripts
-      can read shop/customer state without extra API calls.
-    {%- endcomment -%}
     <script>
       window.__SHOPIFY_CONTEXT__ = {
         shopDomain:    {{ shop.permanent_domain | json }},
@@ -100,14 +85,6 @@
     </script>
 
     {% unless is_native_page %}
-      {%- comment -%}
-        React SPA root — only mounted on SPA-managed routes (home, /shop,
-        /outfits, /auth/*, /account, /ai-assistant, etc.).
-        Customer pages, collection pages, product pages, and search use
-        Shopify native templates and must NOT have the SPA mounted, otherwise
-        React Router's catch-all renders a 404 that covers the template content
-        and blocks OAuth callbacks (e.g. Oxi Social Login Google redirect).
-      {%- endcomment -%}
       <div id="root"></div>
       <script type="module" src="{{ 'layered-app.js' | asset_url }}"></script>
     {% endunless %}
