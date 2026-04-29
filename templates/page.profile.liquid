@@ -1,139 +1,137 @@
 {% comment %} Profile — uses SPA design tokens from layered-app.css {% endcomment %}
 
 {%- comment -%} ── Minimal site nav for native pages ── {%- endcomment -%}
-<header class="fixed top-0 inset-x-0 z-50 border-b border-white/5 bg-black/60 backdrop-blur-xl transition-colors duration-300">
-  <div class="container max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-    <a href="/" class="font-display text-2xl tracking-tighter text-white group flex items-center gap-2">
-      <span class="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-bold text-base transition-transform group-hover:rotate-12">L</span>
+<header class="lp-nav fixed top-0 inset-x-0 z-50">
+  <div class="lp-nav-inner container max-w-7xl mx-auto px-8 h-[72px] flex items-center justify-between">
+    <a href="/" class="font-display text-xl tracking-tighter lp-logo group flex items-center gap-3">
+      <span class="lp-logo-mark w-9 h-9 flex items-center justify-center font-bold text-sm transition-transform duration-500 group-hover:rotate-12">L</span>
       Layered
     </a>
-    <nav class="hidden md:flex items-center gap-8">
-      <a href="/collections/all" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Shop</a>
-      <a href="/outfits" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Outfits</a>
-      <a href="/ai-assistant" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">AI Stylist</a>
-      <a href="/pages/profile" class="text-[10px] uppercase tracking-[0.2em] text-white border-b border-white pb-1">Profile</a>
-      <a href="/pages/pricing" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Pricing</a>
+    <nav class="hidden md:flex items-center gap-10">
+      <a href="/collections/all" class="lp-nav-link">Shop</a>
+      <a href="/outfits" class="lp-nav-link">Outfits</a>
+      <a href="/ai-assistant" class="lp-nav-link">AI Stylist</a>
+      <a href="/pages/profile" class="lp-nav-link lp-nav-link--active">Profile</a>
+      <a href="/pages/pricing" class="lp-nav-link">Pricing</a>
       {% if customer %}
-        <a href="/account" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Account</a>
+        <a href="/account" class="lp-nav-link">Account</a>
       {% else %}
-        <a href="{{ routes.account_login_url }}" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Sign in</a>
+        <a href="{{ routes.account_login_url }}" class="lp-nav-link">Sign in</a>
       {% endif %}
     </nav>
-    <button id="pf-menu-toggle" class="md:hidden p-2 -mr-2 text-white" aria-label="Menu">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h18M3 16h18"/></svg>
+    <button id="pf-menu-toggle" class="lp-hamburger md:hidden" aria-label="Menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 8h18M3 16h18"/></svg>
     </button>
   </div>
-  <div id="pf-mobile-menu" class="md:hidden hidden border-t border-white/5 bg-black/95 backdrop-blur-2xl">
-    <div class="container max-w-7xl mx-auto px-6 py-8 flex flex-col gap-6">
-      <a href="/collections/all" class="text-xl font-display text-white/70 hover:text-white">Shop</a>
-      <a href="/outfits" class="text-xl font-display text-white/70 hover:text-white">Outfits</a>
-      <a href="/ai-assistant" class="text-xl font-display text-white/70 hover:text-white">AI Stylist</a>
-      <a href="/pages/profile" class="text-xl font-display text-white">Profile</a>
-      <a href="/pages/pricing" class="text-xl font-display text-white/70 hover:text-white">Pricing</a>
+  <div id="pf-mobile-menu" class="lp-mobile-menu hidden md:hidden">
+    <div class="container max-w-7xl mx-auto px-8 py-12 flex flex-col gap-7">
+      <a href="/collections/all" class="lp-mobile-link">Shop</a>
+      <a href="/outfits" class="lp-mobile-link">Outfits</a>
+      <a href="/ai-assistant" class="lp-mobile-link">AI Stylist</a>
+      <a href="/pages/profile" class="lp-mobile-link lp-mobile-link--active">Profile</a>
+      <a href="/pages/pricing" class="lp-mobile-link">Pricing</a>
       {% if customer %}
-        <a href="/account" class="text-xl font-display text-white/70 hover:text-white">Account</a>
+        <a href="/account" class="lp-mobile-link">Account</a>
       {% else %}
-        <a href="{{ routes.account_login_url }}" class="text-xl font-display text-white/70 hover:text-white">Sign in</a>
+        <a href="{{ routes.account_login_url }}" class="lp-mobile-link">Sign in</a>
       {% endif %}
     </div>
   </div>
 </header>
 
-<div class="min-h-screen bg-black text-white pt-16">
-  <div class="container max-w-7xl mx-auto px-6 py-20">
+<div class="lp-page min-h-screen pt-[72px]">
+  <div class="container max-w-7xl mx-auto px-8 py-24">
 
     {% if customer %}
 
       {%- comment -%} ── Page heading ── {%- endcomment -%}
-      <div class="mb-20 reveal">
-        <p class="text-[10px] tracking-[0.4em] uppercase text-white/40 mb-6 font-semibold">Dashboard</p>
-        <h1 class="font-display text-6xl md:text-8xl leading-[0.9] tracking-tighter">{{ customer.first_name }}<span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/30 italic">'s space.</span></h1>
+      <div class="lp-hero mb-24 reveal">
+        <p class="lp-eyebrow mb-5">Dashboard</p>
+        <h1 class="lp-display">{{ customer.first_name }}<span class="lp-display--italic">'s space.</span></h1>
+        <div class="lp-hero-rule"></div>
       </div>
 
-      <div class="grid lg:grid-cols-3 gap-12">
+      <div class="grid lg:grid-cols-3 gap-14">
 
         {%- comment -%} ── Left column ── {%- endcomment -%}
-        <div class="lg:col-span-2 space-y-12">
+        <div class="lg:col-span-2 space-y-10">
 
-          {%- comment -%} Usage tracker (AI Generations) {%- endcomment -%}
+          {%- comment -%} Usage tracker {%- endcomment -%}
           {% if customer.tags contains 'Pro Member' %}
-            <div class="bg-white/5 border border-white/10 p-8 md:p-10 relative overflow-hidden group reveal">
-              <div class="absolute inset-0 bg-gradient-to-br from-[#F2EBE3]/5 via-transparent to-[#F2EBE3]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div class="relative z-10">
-                <div class="flex items-center justify-between mb-8">
-                  <div>
-                    <h2 class="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-1 font-bold">Pro Membership Perk</h2>
-                    <p class="text-xl font-display">AI Virtual Try-On Generations</p>
-                  </div>
-                  <div class="text-right">
-                    <span class="text-3xl font-display">42</span>
-                    <span class="text-white/30 text-xs">/ 100</span>
-                  </div>
+            <div class="lp-card reveal">
+              <div class="lp-card-header">
+                <div>
+                  <p class="lp-label mb-1">Pro Membership Perk</p>
+                  <p class="lp-card-title">AI Virtual Try-On Generations</p>
                 </div>
-                <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mb-4">
-                  <div class="h-full bg-[#F2EBE3] w-[42%] rounded-full shadow-[0_0_15px_rgba(242,235,227,0.3)]"></div>
+                <div class="lp-usage-count text-right">
+                  <span class="lp-stat-number">42</span>
+                  <span class="lp-stat-denom">/ 100</span>
                 </div>
-                <div class="flex justify-between text-[10px] uppercase tracking-widest text-white/30 font-bold">
-                  <span>Usage this month</span>
-                  <span>58 Remaining</span>
-                </div>
+              </div>
+              <div class="lp-progress-track">
+                <div class="lp-progress-fill" style="width: 42%"></div>
+              </div>
+              <div class="lp-progress-labels">
+                <span>Usage this month</span>
+                <span>58 Remaining</span>
               </div>
             </div>
           {% endif %}
 
           {%- comment -%} Account details card {%- endcomment -%}
-          <div class="bg-white/5 border border-white/10 p-8 md:p-10 reveal" style="transition-delay:100ms">
-            <div class="flex items-center justify-between mb-10">
-              <h2 class="text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold">Account Intelligence</h2>
-              <a href="/account" class="text-[10px] uppercase tracking-widest text-white/40 hover:text-white transition-colors border-b border-white/10 pb-0.5">Modify Account</a>
+          <div class="lp-card reveal" style="transition-delay:80ms">
+            <div class="lp-card-header mb-10">
+              <p class="lp-label">Account Intelligence</p>
+              <a href="/account" class="lp-text-link">Modify Account</a>
             </div>
             <div class="grid sm:grid-cols-2 gap-8">
-              <div>
-                <p class="text-[10px] uppercase tracking-[0.2em] text-white/20 mb-2">Legal Identity</p>
-                <p class="text-lg font-medium">{{ customer.name | default: '—' }}</p>
+              <div class="lp-field">
+                <p class="lp-field-label">Legal Identity</p>
+                <p class="lp-field-value">{{ customer.name | default: '—' }}</p>
               </div>
-              <div>
-                <p class="text-[10px] uppercase tracking-[0.2em] text-white/20 mb-2">Digital Address</p>
-                <p class="text-lg font-medium truncate">{{ customer.email }}</p>
+              <div class="lp-field">
+                <p class="lp-field-label">Digital Address</p>
+                <p class="lp-field-value truncate">{{ customer.email }}</p>
               </div>
-              <div>
-                <p class="text-[10px] uppercase tracking-[0.2em] text-white/20 mb-2">Member Since</p>
-                <p class="text-lg font-medium">{{ customer.created_at | date: "%B %Y" }}</p>
+              <div class="lp-field">
+                <p class="lp-field-label">Member Since</p>
+                <p class="lp-field-value">{{ customer.created_at | date: "%B %Y" }}</p>
               </div>
-              <div>
-                <p class="text-[10px] uppercase tracking-[0.2em] text-white/20 mb-2">History</p>
-                <p class="text-lg font-medium">{{ customer.orders.size }} Orders</p>
+              <div class="lp-field">
+                <p class="lp-field-label">History</p>
+                <p class="lp-field-value">{{ customer.orders.size }} Orders</p>
               </div>
             </div>
           </div>
 
           {%- comment -%} Style preferences {%- endcomment -%}
-          <div class="bg-white/5 border border-white/10 p-8 md:p-10 reveal" style="transition-delay:200ms">
-            <h2 class="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-10 font-bold">Style Algorithm</h2>
-            <p class="text-sm text-white/40 mb-8 leading-relaxed">Select your areas of focus. Our engine uses these to curate your feed.</p>
+          <div class="lp-card reveal" style="transition-delay:160ms">
+            <p class="lp-label mb-6">Style Algorithm</p>
+            <p class="lp-body-muted mb-8">Select your areas of focus. Our engine uses these to curate your feed.</p>
             <div id="pf-prefs" class="flex flex-wrap gap-3 mb-10">
               {%- assign categories = 'Tops,Bottoms,Outerwear,Shoes,Accessories' | split: ',' -%}
               {% for cat in categories %}
                 <button
                   data-cat="{{ cat }}"
-                  class="pf-pref-btn px-6 py-3 text-[10px] uppercase tracking-[0.2em] border border-white/10 transition-all hover:border-white font-bold"
+                  class="pf-pref-btn lp-pref-btn"
                 >{{ cat }}</button>
               {% endfor %}
             </div>
-            <button id="pf-save-prefs" class="group relative px-8 py-4 bg-white text-black text-[10px] uppercase tracking-[0.2em] font-bold overflow-hidden transition-transform hover:scale-105 active:scale-95">
+            <button id="pf-save-prefs" class="lp-btn-primary">
               Sync Preferences
             </button>
-            <p id="pf-prefs-saved" class="text-[10px] uppercase tracking-widest text-green-500 mt-4 hidden font-bold">Preferences synchronized.</p>
+            <p id="pf-prefs-saved" class="lp-saved-msg mt-4 hidden">Preferences synchronized.</p>
           </div>
 
           {%- comment -%} Saved outfits {%- endcomment -%}
-          <div class="bg-white/5 border border-white/10 p-8 md:p-10 reveal" style="transition-delay:300ms">
-            <div class="flex items-center justify-between mb-10">
-              <h2 class="text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold">Saved Blueprints</h2>
-              <a href="/outfits/build" class="text-[10px] uppercase tracking-widest text-white/40 hover:text-white transition-colors border-b border-white/10 pb-0.5">New Build →</a>
+          <div class="lp-card reveal" style="transition-delay:240ms">
+            <div class="lp-card-header mb-10">
+              <p class="lp-label">Saved Blueprints</p>
+              <a href="/outfits/build" class="lp-text-link">New Build →</a>
             </div>
             <div id="pf-outfits-list">
-              <p class="text-sm text-white/20">Initialising archives…</p>
+              <p class="lp-body-muted">Initialising archives…</p>
             </div>
           </div>
 
@@ -143,36 +141,36 @@
         <div class="space-y-8">
 
           {%- comment -%} Identity card {%- endcomment -%}
-          <div class="bg-white/5 border border-white/10 p-10 text-center relative overflow-hidden reveal" style="transition-delay:150ms">
-            <div class="w-20 h-20 bg-white text-black flex items-center justify-center text-3xl font-display mx-auto mb-6 rounded-full">
+          <div class="lp-card lp-card--identity text-center reveal" style="transition-delay:120ms">
+            <div class="lp-avatar mx-auto mb-6">
               {{ customer.first_name | slice: 0 | upcase }}
             </div>
-            <p class="font-display text-2xl mb-1">{{ customer.name }}</p>
-            <p class="text-[10px] text-white/30 uppercase tracking-[0.2em] mb-8">{{ customer.email }}</p>
+            <p class="font-display text-2xl mb-1 lp-identity-name">{{ customer.name }}</p>
+            <p class="lp-identity-email mb-8">{{ customer.email }}</p>
             
             {% if customer.tags contains 'Pro Member' %}
-              <div class="inline-flex items-center gap-2 px-4 py-2 bg-white text-black text-[10px] uppercase tracking-[0.2em] font-bold">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+              <div class="lp-badge-pro inline-flex items-center gap-2 mb-3">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
                 Pro Member
               </div>
-              <p class="text-[9px] text-white/20 mt-4 uppercase tracking-[0.2em]">15% Discount Active</p>
+              <p class="lp-discount-note">15% Discount Active</p>
             {% else %}
-              <a href="/pages/pricing" class="group relative inline-block w-full py-4 bg-transparent border border-white text-white text-[10px] uppercase tracking-[0.2em] font-bold overflow-hidden transition-all hover:bg-white hover:text-black">
+              <a href="/pages/pricing" class="lp-btn-outline w-full block">
                 Upgrade to Pro
               </a>
-              <p class="text-[9px] text-white/20 mt-4 uppercase tracking-[0.2em]">Unlock 15% discount</p>
+              <p class="lp-discount-note mt-3">Unlock 15% discount</p>
             {% endif %}
           </div>
 
           {%- comment -%} Quick links {%- endcomment -%}
-          <div class="bg-white/5 border border-white/10 p-10 reveal" style="transition-delay:250ms">
-            <h3 class="text-[10px] uppercase tracking-[0.4em] text-white/40 mb-8 font-bold">Navigation</h3>
-            <ul class="space-y-6 text-[10px] uppercase tracking-[0.2em] font-bold">
-              <li><a href="/account" class="text-white/40 hover:text-white transition-colors flex items-center justify-between group">Order Archive <span class="opacity-0 group-hover:opacity-100 transition-opacity">→</span></a></li>
-              <li><a href="{{ routes.account_addresses_url }}" class="text-white/40 hover:text-white transition-colors flex items-center justify-between group">Addresses <span class="opacity-0 group-hover:opacity-100 transition-opacity">→</span></a></li>
-              <li><a href="/pages/pricing" class="text-white/40 hover:text-white transition-colors flex items-center justify-between group">Membership <span class="opacity-0 group-hover:opacity-100 transition-opacity">→</span></a></li>
-              <li><a href="/collections/all" class="text-white/40 hover:text-white transition-colors flex items-center justify-between group">Marketplace <span class="opacity-0 group-hover:opacity-100 transition-opacity">→</span></a></li>
-              <li class="pt-4 border-t border-white/5"><a href="{{ routes.account_logout_url }}" class="text-red-500/50 hover:text-red-500 transition-colors">Terminate Session</a></li>
+          <div class="lp-card reveal" style="transition-delay:200ms">
+            <p class="lp-label mb-8">Navigation</p>
+            <ul class="lp-nav-list space-y-1">
+              <li><a href="/account" class="lp-nav-item group">Order Archive <span class="lp-nav-arrow">→</span></a></li>
+              <li><a href="{{ routes.account_addresses_url }}" class="lp-nav-item group">Addresses <span class="lp-nav-arrow">→</span></a></li>
+              <li><a href="/pages/pricing" class="lp-nav-item group">Membership <span class="lp-nav-arrow">→</span></a></li>
+              <li><a href="/collections/all" class="lp-nav-item group">Marketplace <span class="lp-nav-arrow">→</span></a></li>
+              <li class="lp-nav-divider"><a href="{{ routes.account_logout_url }}" class="lp-nav-item lp-nav-item--danger">Terminate Session</a></li>
             </ul>
           </div>
 
@@ -181,10 +179,13 @@
 
     {% else %}
 
-      <div class="max-w-xl mx-auto text-center py-32 border border-dashed border-white/10 bg-white/5">
-        <h2 class="font-display text-4xl mb-6">Authorisation Required</h2>
-        <p class="text-sm text-white/40 mb-10 max-w-xs mx-auto leading-relaxed">Your profile and style algorithm are only accessible within an active session.</p>
-        <a href="{{ routes.account_login_url }}?return_to=/pages/profile" class="inline-block bg-white text-black text-[10px] uppercase tracking-[0.4em] px-12 py-5 font-bold hover:scale-105 transition-transform">
+      <div class="lp-auth-gate reveal">
+        <div class="lp-auth-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h2 class="font-display text-4xl mb-5 lp-auth-title">Authorisation Required</h2>
+        <p class="lp-auth-body mb-12">Your profile and style algorithm are only accessible within an active session.</p>
+        <a href="{{ routes.account_login_url }}?return_to=/pages/profile" class="lp-btn-primary lp-btn-primary--large">
           Sign In
         </a>
       </div>
@@ -195,7 +196,521 @@
 </div>
 
 <style>
-  /* ── Arbitrary Tailwind class fallbacks (not compiled into layered-app.css) ── */
+  /* ── Layered Profile — Redesign ──────────────────────────────────────────── */
+  :root {
+    --beige: #F2EBE3;
+    --beige-dark: #E8DDD3;
+    --beige-mid: #D4C9BE;
+    --black: #0E0E0E;
+    --off-black: #1A1A1A;
+    --soft-black: #2C2C2C;
+    --white: #FFFFFF;
+    --cream: #FAF8F5;
+  }
+
+  /* ── Base page ──────────────────────────────────────────────────────────── */
+  .lp-page {
+    background-color: var(--cream);
+    color: var(--black);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── Navigation ─────────────────────────────────────────────────────────── */
+  .lp-nav {
+    background: rgba(250, 248, 245, 0.92);
+    border-bottom: 1px solid rgba(14, 14, 14, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: all 0.3s ease;
+  }
+
+  .lp-logo {
+    color: var(--black);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+  }
+
+  .lp-logo-mark {
+    width: 34px;
+    height: 34px;
+    background: var(--black);
+    color: var(--white);
+    border-radius: 50%;
+    font-family: 'Fraunces', serif;
+  }
+
+  .lp-nav-link {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 600;
+    color: rgba(14, 14, 14, 0.38);
+    transition: color 0.2s ease;
+    text-decoration: none;
+  }
+
+  .lp-nav-link:hover { color: var(--black); }
+  .lp-nav-link--active {
+    color: var(--black);
+    border-bottom: 1.5px solid var(--black);
+    padding-bottom: 2px;
+  }
+
+  .lp-hamburger {
+    background: none;
+    border: none;
+    color: var(--black);
+    cursor: pointer;
+    padding: 6px;
+  }
+
+  .lp-mobile-menu {
+    background: var(--cream);
+    border-top: 1px solid rgba(14, 14, 14, 0.08);
+  }
+
+  .lp-mobile-link {
+    font-family: 'Fraunces', serif;
+    font-size: 1.25rem;
+    color: rgba(14, 14, 14, 0.45);
+    text-decoration: none;
+    transition: color 0.2s;
+    font-style: italic;
+  }
+
+  .lp-mobile-link:hover,
+  .lp-mobile-link--active { color: var(--black); }
+
+  /* ── Hero Heading ───────────────────────────────────────────────────────── */
+  .lp-hero { }
+
+  .lp-eyebrow {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4em;
+    color: rgba(14, 14, 14, 0.35);
+    font-weight: 600;
+  }
+
+  .lp-display {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(3.5rem, 8vw, 6.5rem);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    color: var(--black);
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .lp-display--italic {
+    font-style: italic;
+    color: rgba(14, 14, 14, 0.22);
+  }
+
+  .lp-hero-rule {
+    width: 60px;
+    height: 1px;
+    background: var(--beige-mid);
+    margin-top: 2rem;
+  }
+
+  /* ── Cards ──────────────────────────────────────────────────────────────── */
+  .lp-card {
+    background: var(--white);
+    border: 1px solid rgba(14, 14, 14, 0.07);
+    padding: 2.5rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .lp-card:hover {
+    border-color: rgba(14, 14, 14, 0.14);
+    box-shadow: 0 8px 40px -12px rgba(14, 14, 14, 0.1);
+  }
+
+  .lp-card--identity {
+    background: var(--beige);
+    border-color: transparent;
+  }
+
+  .lp-card--identity:hover {
+    border-color: var(--beige-mid);
+    box-shadow: 0 8px 32px -8px rgba(14, 14, 14, 0.08);
+  }
+
+  .lp-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .lp-card-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--black);
+    margin-top: 2px;
+  }
+
+  /* ── Labels & text styles ───────────────────────────────────────────────── */
+  .lp-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    color: rgba(14, 14, 14, 0.35);
+  }
+
+  .lp-text-link {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+    color: rgba(14, 14, 14, 0.4);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(14, 14, 14, 0.12);
+    padding-bottom: 2px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .lp-text-link:hover {
+    color: var(--black);
+    border-color: var(--black);
+  }
+
+  .lp-body-muted {
+    font-size: 0.875rem;
+    color: rgba(14, 14, 14, 0.45);
+    line-height: 1.7;
+  }
+
+  /* ── Fields ─────────────────────────────────────────────────────────────── */
+  .lp-field { }
+
+  .lp-field-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 600;
+    color: rgba(14, 14, 14, 0.28);
+    margin-bottom: 6px;
+  }
+
+  .lp-field-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--black);
+    letter-spacing: -0.01em;
+  }
+
+  /* ── Progress bar ───────────────────────────────────────────────────────── */
+  .lp-stat-number {
+    font-family: 'Fraunces', serif;
+    font-size: 2.25rem;
+    font-weight: 400;
+    color: var(--black);
+  }
+
+  .lp-stat-denom {
+    font-size: 0.75rem;
+    color: rgba(14, 14, 14, 0.3);
+    margin-left: 2px;
+  }
+
+  .lp-progress-track {
+    height: 2px;
+    background: rgba(14, 14, 14, 0.07);
+    width: 100%;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+  }
+
+  .lp-progress-fill {
+    height: 100%;
+    background: var(--black);
+    transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .lp-progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 700;
+    color: rgba(14, 14, 14, 0.3);
+  }
+
+  /* ── Preferences buttons ────────────────────────────────────────────────── */
+  .lp-pref-btn {
+    padding: 10px 20px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    border: 1px solid rgba(14, 14, 14, 0.15);
+    background: transparent;
+    color: rgba(14, 14, 14, 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .lp-pref-btn:hover {
+    border-color: var(--black);
+    color: var(--black);
+  }
+
+  .lp-pref-btn.active,
+  .lp-pref-btn.bg-white {
+    background: var(--black) !important;
+    color: var(--white) !important;
+    border-color: var(--black) !important;
+  }
+
+  /* ── Buttons ────────────────────────────────────────────────────────────── */
+  .lp-btn-primary {
+    display: inline-block;
+    padding: 14px 32px;
+    background: var(--black);
+    color: var(--white);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s ease, opacity 0.2s;
+    text-align: center;
+  }
+
+  .lp-btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+  .lp-btn-primary:active { transform: scale(0.98); }
+
+  .lp-btn-primary--large {
+    padding: 18px 56px;
+    font-size: 11px;
+  }
+
+  .lp-btn-outline {
+    display: inline-block;
+    padding: 13px 24px;
+    background: transparent;
+    border: 1.5px solid var(--black);
+    color: var(--black);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.25s ease, color 0.25s ease;
+    text-align: center;
+  }
+
+  .lp-btn-outline:hover {
+    background: var(--black);
+    color: var(--white);
+  }
+
+  .lp-saved-msg {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 700;
+    color: #2a7a4b;
+  }
+
+  /* ── Identity card ──────────────────────────────────────────────────────── */
+  .lp-avatar {
+    width: 72px;
+    height: 72px;
+    background: var(--black);
+    color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: 1.75rem;
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  .lp-identity-name {
+    color: var(--black);
+    letter-spacing: -0.02em;
+  }
+
+  .lp-identity-email {
+    font-size: 10px;
+    text-transform: none;
+    color: rgba(14, 14, 14, 0.42);
+    letter-spacing: 0;
+    font-size: 0.8rem;
+  }
+
+  .lp-badge-pro {
+    background: var(--black);
+    color: var(--white);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 700;
+    padding: 8px 16px;
+  }
+
+  .lp-discount-note {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: rgba(14, 14, 14, 0.35);
+    font-weight: 600;
+    margin-top: 10px;
+  }
+
+  /* ── Nav list ───────────────────────────────────────────────────────────── */
+  .lp-nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 0;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    color: rgba(14, 14, 14, 0.4);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(14, 14, 14, 0.06);
+    transition: color 0.2s ease;
+  }
+
+  .lp-nav-item:last-child { border-bottom: none; }
+  .lp-nav-item:hover { color: var(--black); }
+
+  .lp-nav-arrow {
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+
+  .lp-nav-item:hover .lp-nav-arrow {
+    opacity: 1;
+    transform: translateX(3px);
+  }
+
+  .lp-nav-divider {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(14, 14, 14, 0.07);
+  }
+
+  .lp-nav-item--danger {
+    color: rgba(185, 40, 40, 0.5);
+    border-bottom: none;
+  }
+
+  .lp-nav-item--danger:hover { color: rgb(185, 40, 40); }
+
+  /* ── Auth gate ──────────────────────────────────────────────────────────── */
+  .lp-auth-gate {
+    max-width: 480px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 6rem 3rem;
+    background: var(--white);
+    border: 1px solid rgba(14, 14, 14, 0.07);
+  }
+
+  .lp-auth-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--beige);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.75rem;
+    color: rgba(14, 14, 14, 0.45);
+  }
+
+  .lp-auth-title { color: var(--black); letter-spacing: -0.02em; }
+  .lp-auth-body {
+    font-size: 0.9rem;
+    color: rgba(14, 14, 14, 0.45);
+    line-height: 1.7;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  /* ── Outfit grid (injected via JS) ─────────────────────────────────────── */
+  .lp-outfit-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  @media (min-width: 640px) { .lp-outfit-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 768px) { .lp-outfit-grid { grid-template-columns: repeat(4, 1fr); } }
+
+  .lp-outfit-card-image {
+    aspect-ratio: 3/4;
+    background: var(--beige);
+    margin-bottom: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(14,14,14,0.06);
+  }
+
+  .lp-outfit-card-image img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .lp-outfit-card:hover .lp-outfit-card-image img { transform: scale(1.06); }
+
+  .lp-outfit-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    color: rgba(14,14,14,0.25);
+    margin-bottom: 3px;
+  }
+
+  .lp-outfit-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: var(--black);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lp-reconfigure-btn {
+    display: inline-block;
+    margin-top: 2rem;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    color: rgba(14,14,14,0.4);
+    text-decoration: none;
+    border: 1px solid rgba(14,14,14,0.12);
+    padding: 12px 24px;
+    transition: all 0.2s;
+  }
+
+  .lp-reconfigure-btn:hover {
+    color: var(--black);
+    border-color: var(--black);
+  }
+
+  /* ── Scroll reveal ──────────────────────────────────────────────────────── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s cubic-bezier(.22,1,.36,1), transform 0.8s cubic-bezier(.22,1,.36,1);
+  }
+  .reveal.active { opacity: 1; transform: translateY(0); }
+
+  /* ── Arbitrary Tailwind fallbacks ───────────────────────────────────────── */
   .text-\[10px\] { font-size: 10px; }
   .text-\[9px\]  { font-size: 9px; }
   .text-\[8px\]  { font-size: 8px; }
@@ -204,63 +719,12 @@
   .tracking-\[0\.4em\] { letter-spacing: .4em; }
   .leading-\[0\.9\]    { line-height: .9; }
   .w-\[42\%\]          { width: 42%; }
-  .aspect-\[3\/4\]     { aspect-ratio: 3 / 4; }
-
-  /* Opacity-modified backgrounds */
-  .bg-white\/5   { background-color: rgb(255 255 255/.05); }
-  .bg-white\/10  { background-color: rgb(255 255 255/.10); }
-  .bg-white\/20  { background-color: rgb(255 255 255/.20); }
-  .bg-black\/5   { background-color: rgb(0 0 0/.05); }
-  .bg-black\/60  { background-color: rgb(0 0 0/.60); }
-  .bg-black\/95  { background-color: rgb(0 0 0/.95); }
-
-  /* Opacity-modified borders */
-  .border-white\/5  { border-color: rgb(255 255 255/.05); }
-  .border-white\/10 { border-color: rgb(255 255 255/.10); }
-  .border-white\/20 { border-color: rgb(255 255 255/.20); }
-
-  /* Opacity-modified text */
-  .text-white\/10 { color: rgb(255 255 255/.10); }
-  .text-white\/20 { color: rgb(255 255 255/.20); }
-  .text-white\/30 { color: rgb(255 255 255/.30); }
-  .text-white\/40 { color: rgb(255 255 255/.40); }
-  .text-white\/50 { color: rgb(255 255 255/.50); }
-  .text-white\/60 { color: rgb(255 255 255/.60); }
-  .text-white\/70 { color: rgb(255 255 255/.70); }
-  .text-white\/80 { color: rgb(255 255 255/.80); }
-  .text-black\/30 { color: rgb(0 0 0/.30); }
-  .text-black\/40 { color: rgb(0 0 0/.40); }
-  .text-black\/60 { color: rgb(0 0 0/.60); }
-
-  /* Gradient colour stops */
-  .to-white\/30 { --tw-gradient-to: rgb(255 255 255/.30); }
-
-  /* Beige (#F2EBE3) accent — progress bar fill, hover overlay, glow */
-  .bg-\[\#F2EBE3\]      { background-color: #F2EBE3; }
-  .bg-\[\#F2EBE3\]\/5   { background-color: rgba(242,235,227,.05); }
-  .bg-\[\#F2EBE3\]\/10  { background-color: rgba(242,235,227,.10); }
-  .from-\[\#F2EBE3\]\/5 { --tw-gradient-from: rgba(242,235,227,.05); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(242,235,227,0)); }
-  .to-\[\#F2EBE3\]\/5   { --tw-gradient-to: rgba(242,235,227,.05); }
-  .shadow-\[0_0_15px_rgba\(242\,235\,227\,0\.3\)\] { box-shadow: 0 0 15px rgba(242,235,227,.3); }
-
-  /* Scroll reveal */
-  .reveal {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity .8s cubic-bezier(.22,1,.36,1), transform .8s cubic-bezier(.22,1,.36,1);
-  }
-  .reveal.active { opacity: 1; transform: translateY(0); }
-
-  /* Backdrop blur */
+  .aspect-\[3\/4\]     { aspect-ratio: 3/4; }
   .backdrop-blur-sm  { -webkit-backdrop-filter: blur(4px);  backdrop-filter: blur(4px); }
   .backdrop-blur-xl  { -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); }
   .backdrop-blur-2xl { -webkit-backdrop-filter: blur(40px); backdrop-filter: blur(40px); }
-
-  /* Scale transitions */
-  .hover\:scale-105:hover   { transform: scale(1.05); }
-  .active\:scale-95:active  { transform: scale(.95); }
-
-  /* Named-group (group/item) for saved outfit cards */
+  .hover\:scale-105:hover  { transform: scale(1.05); }
+  .active\:scale-95:active { transform: scale(.95); }
   .group\/item:hover .group-hover\/item\:scale-110 { transform: scale(1.10); }
 </style>
 
@@ -283,9 +747,11 @@
 
   document.querySelectorAll('.pf-pref-btn').forEach(btn => {
     if (saved.includes(btn.dataset.cat)) {
-      btn.classList.add('bg-white', 'text-black', 'border-white');
+      btn.classList.add('active');
     }
     btn.addEventListener('click', () => {
+      btn.classList.toggle('active');
+      // keep backward compat class names
       btn.classList.toggle('bg-white');
       btn.classList.toggle('text-black');
       btn.classList.toggle('border-white');
@@ -294,7 +760,7 @@
 
   document.getElementById('pf-save-prefs')?.addEventListener('click', () => {
     const active = [...document.querySelectorAll('.pf-pref-btn')]
-      .filter(b => b.classList.contains('bg-white'))
+      .filter(b => b.classList.contains('active'))
       .map(b => b.dataset.cat);
     localStorage.setItem(PREFS_KEY, JSON.stringify(active));
     const msg = document.getElementById('pf-prefs-saved');
@@ -312,28 +778,31 @@
     const filled = Object.entries(slots).filter(([, v]) => v && v.product);
 
     if (filled.length === 0) {
-      container.innerHTML = '<p class="text-sm text-white/20">No saved blueprints found in the current session. <a href="/outfits/build" class="underline hover:text-white transition-colors">Start a new build →</a></p>';
+      container.innerHTML = '<p class="lp-body-muted">No saved blueprints found in the current session. <a href="/outfits/build" style="text-decoration:underline;color:inherit;opacity:0.7;transition:opacity 0.2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">Start a new build →</a></p>';
       return;
     }
 
-    let html = '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">';
+    let html = '<div class="lp-outfit-grid">';
     filled.forEach(([slot, v]) => {
       const img   = v.product?.node?.images?.edges?.[0]?.node?.url || '';
       const title = v.product?.node?.title || slot;
       const label = slot.charAt(0).toUpperCase() + slot.slice(1);
-      html += `<div class="group/item">
-        <div class="aspect-[3/4] bg-white/5 mb-3 overflow-hidden border border-white/5">
-          ${img ? `<img src="${img}" alt="${title}" class="w-full h-full object-cover transition-transform group-hover/item:scale-110 duration-500">` : '<div class="w-full h-full flex items-center justify-center text-white/10 text-[10px] uppercase tracking-widest">' + label + '</div>'}
+      html += `<div class="lp-outfit-card">
+        <div class="lp-outfit-card-image">
+          ${img
+            ? `<img src="${img}" alt="${title}">`
+            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;text-transform:uppercase;letter-spacing:0.2em;color:rgba(14,14,14,0.25);font-weight:700">${label}</div>`
+          }
         </div>
-        <p class="text-[8px] uppercase tracking-[0.2em] text-white/20 mb-1 font-bold">${label}</p>
-        <p class="text-[10px] uppercase tracking-widest truncate font-medium">${title}</p>
+        <p class="lp-outfit-label">${label}</p>
+        <p class="lp-outfit-title">${title}</p>
       </div>`;
     });
     html += '</div>';
-    html += '<a href="/outfits/build" class="inline-block mt-8 text-[10px] uppercase tracking-[0.2em] border border-white/10 px-6 py-3 hover:border-white transition-colors font-bold">Reconfigure Build →</a>';
+    html += '<a href="/outfits/build" class="lp-reconfigure-btn">Reconfigure Build →</a>';
     container.innerHTML = html;
   } catch(e) {
-    container.innerHTML = '<p class="text-sm text-white/20">Archive retrieval failed.</p>';
+    container.innerHTML = '<p class="lp-body-muted">Archive retrieval failed.</p>';
   }
 })();
 </script>

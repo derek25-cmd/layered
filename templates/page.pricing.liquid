@@ -1,201 +1,205 @@
 {% comment %} Pricing — uses SPA design tokens from layered-app.css {% endcomment %}
 
 {%- comment -%} ── Minimal site nav for native pages ── {%- endcomment -%}
-<header class="fixed top-0 inset-x-0 z-50 border-b border-white/5 bg-black/60 backdrop-blur-xl transition-colors duration-300">
-  <div class="container max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-    <a href="/" class="font-display text-2xl tracking-tighter text-white group flex items-center gap-2">
-      <span class="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-bold text-base transition-transform group-hover:rotate-12">L</span>
+<header class="lp-nav fixed top-0 inset-x-0 z-50">
+  <div class="lp-nav-inner container max-w-7xl mx-auto px-8 h-[72px] flex items-center justify-between">
+    <a href="/" class="lp-logo font-display text-xl tracking-tighter group flex items-center gap-3">
+      <span class="lp-logo-mark w-9 h-9 flex items-center justify-center font-bold text-sm transition-transform duration-500 group-hover:rotate-12">L</span>
       Layered
     </a>
-    <nav class="hidden md:flex items-center gap-8">
-      <a href="/collections/all" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Shop</a>
-      <a href="/outfits" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Outfits</a>
-      <a href="/ai-assistant" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">AI Stylist</a>
-      <a href="/pages/profile" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Profile</a>
-      <a href="/pages/pricing" class="text-[10px] uppercase tracking-[0.2em] text-white border-b border-white pb-1">Pricing</a>
+    <nav class="hidden md:flex items-center gap-10">
+      <a href="/collections/all" class="lp-nav-link">Shop</a>
+      <a href="/outfits" class="lp-nav-link">Outfits</a>
+      <a href="/ai-assistant" class="lp-nav-link">AI Stylist</a>
+      <a href="/pages/profile" class="lp-nav-link">Profile</a>
+      <a href="/pages/pricing" class="lp-nav-link lp-nav-link--active">Pricing</a>
       {% if customer %}
-        <a href="/account" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Account</a>
+        <a href="/account" class="lp-nav-link">Account</a>
       {% else %}
-        <a href="{{ routes.account_login_url }}" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Sign in</a>
+        <a href="{{ routes.account_login_url }}" class="lp-nav-link">Sign in</a>
       {% endif %}
     </nav>
-    <button id="pr-menu-toggle" class="md:hidden p-2 -mr-2 text-white" aria-label="Menu">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h18M3 16h18"/></svg>
+    <button id="pr-menu-toggle" class="lp-hamburger md:hidden" aria-label="Menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 8h18M3 16h18"/></svg>
     </button>
   </div>
-  <div id="pr-mobile-menu" class="md:hidden hidden border-t border-white/5 bg-black/95 backdrop-blur-2xl">
-    <div class="container max-w-7xl mx-auto px-6 py-8 flex flex-col gap-6">
-      <a href="/collections/all" class="text-xl font-display text-white/70 hover:text-white">Shop</a>
-      <a href="/outfits" class="text-xl font-display text-white/70 hover:text-white">Outfits</a>
-      <a href="/ai-assistant" class="text-xl font-display text-white/70 hover:text-white">AI Stylist</a>
-      <a href="/pages/profile" class="text-xl font-display text-white/70 hover:text-white">Profile</a>
-      <a href="/pages/pricing" class="text-xl font-display text-white">Pricing</a>
+  <div id="pr-mobile-menu" class="lp-mobile-menu hidden md:hidden">
+    <div class="container max-w-7xl mx-auto px-8 py-12 flex flex-col gap-7">
+      <a href="/collections/all" class="lp-mobile-link">Shop</a>
+      <a href="/outfits" class="lp-mobile-link">Outfits</a>
+      <a href="/ai-assistant" class="lp-mobile-link">AI Stylist</a>
+      <a href="/pages/profile" class="lp-mobile-link">Profile</a>
+      <a href="/pages/pricing" class="lp-mobile-link lp-mobile-link--active">Pricing</a>
       {% if customer %}
-        <a href="/account" class="text-xl font-display text-white/70 hover:text-white">Account</a>
+        <a href="/account" class="lp-mobile-link">Account</a>
       {% else %}
-        <a href="{{ routes.account_login_url }}" class="text-xl font-display text-white/70 hover:text-white">Sign in</a>
+        <a href="{{ routes.account_login_url }}" class="lp-mobile-link">Sign in</a>
       {% endif %}
     </div>
   </div>
 </header>
 
-<div class="min-h-screen bg-black text-white pt-16 overflow-hidden">
+<div class="lp-page min-h-screen pt-[72px] overflow-hidden">
   {%- assign pro_product = all_products['layered-pro-plan'] -%}
-  
-  {%- comment -%} Background decorative elements {%- endcomment -%}
-  <div class="fixed inset-0 pointer-events-none overflow-hidden">
-    <div class="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-[#F2EBE3]/10 blur-[120px] rounded-full animate-pulse"></div>
-    <div class="absolute top-[20%] -right-[10%] w-[50%] h-[50%] bg-[#F2EBE3]/5 blur-[120px] rounded-full animate-pulse" style="animation-delay: 2s"></div>
-  </div>
 
-  <div class="container max-w-7xl mx-auto px-6 py-20 relative z-10">
+  {%- comment -%} Background subtle texture ── {%- endcomment -%}
+  <div class="lp-bg-accent" aria-hidden="true"></div>
+
+  <div class="container max-w-7xl mx-auto px-8 py-24 relative z-10">
 
     {%- comment -%} ── Heading ── {%- endcomment -%}
-    <div class="max-w-3xl mb-24 reveal">
-      <p class="text-[10px] tracking-[0.4em] uppercase text-white/40 mb-6 font-semibold">Elevate your experience</p>
-      <h1 class="font-display text-6xl md:text-8xl leading-[0.9] tracking-tighter mb-8">Premium care for your <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/30 italic">style.</span></h1>
-      <p class="text-lg text-white/50 max-w-md leading-relaxed">Choose the plan that fits your journey. One for the essentials, one for those who want it all.</p>
+    <div class="lp-pricing-hero mb-28 reveal">
+      <div class="lp-pricing-hero-inner">
+        <p class="lp-eyebrow mb-5">Elevate your experience</p>
+        <h1 class="lp-display">Premium care for your <span class="lp-display--italic">style.</span></h1>
+        <div class="lp-hero-rule"></div>
+        <p class="lp-hero-body mt-8">Choose the plan that fits your journey. One for the essentials, one for those who want it all.</p>
+      </div>
     </div>
 
     {%- comment -%} ── Plans ── {%- endcomment -%}
-    <div class="grid md:grid-cols-2 gap-8 mb-24">
+    <div class="lp-plans-grid mb-28">
 
       {%- comment -%} Free ── {%- endcomment -%}
-      <div class="group bg-white/5 border border-white/10 p-10 md:p-12 backdrop-blur-sm hover:border-white/20 transition-all duration-500 reveal" style="transition-delay: 100ms">
-        <div class="flex justify-between items-start mb-12">
+      <div class="lp-plan lp-plan--free reveal" style="transition-delay: 80ms">
+        <div class="lp-plan-top">
           <div>
-            <p class="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-4">The Starting Point</p>
-            <h2 class="font-display text-4xl">Essential</h2>
+            <p class="lp-label mb-4">The Starting Point</p>
+            <h2 class="lp-plan-name">Essential</h2>
           </div>
           <div class="text-right">
-            <span class="font-display text-5xl">£0</span>
-            <span class="text-[10px] uppercase tracking-widest text-white/30 block mt-1">Forever</span>
+            <span class="lp-price">£0</span>
+            <span class="lp-price-note block">Forever</span>
           </div>
         </div>
-        
-        <p class="text-sm text-white/40 mb-12 leading-relaxed">Perfect for discovering your style and exploring the Layered catalogue.</p>
-        
-        <ul class="space-y-4 mb-16">
+
+        <p class="lp-plan-desc">Perfect for discovering your style and exploring the Layered catalogue.</p>
+
+        <ul class="lp-features">
           {%- assign free_features = 'Full product catalogue,AI Stylist (5/day),Outfit builder (save up to 3),Virtual Try-On (2/day)' | split: ',' -%}
           {%- assign free_no = '15% off every order,Free shipping,Priority new drops,Unlimited saves' | split: ',' -%}
           {% for f in free_features %}
-            <li class="flex items-center gap-4 text-sm text-white/70">
-              <span class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center flex-shrink-0 group-hover:border-white/40 transition-colors">
-                <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <li class="lp-feature lp-feature--yes">
+              <span class="lp-feature-icon lp-feature-icon--yes">
+                <svg width="9" height="9" viewBox="0 0 16 16" fill="none"><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
               {{ f }}
             </li>
           {% endfor %}
           {% for f in free_no %}
-            <li class="flex items-center gap-4 text-sm text-white/20 line-through decoration-white/10">
-              <span class="w-5 h-5 rounded-full border border-white/5 flex items-center justify-center flex-shrink-0">
-                <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M5.5 10.5l5-5M10.5 10.5l-5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <li class="lp-feature lp-feature--no">
+              <span class="lp-feature-icon lp-feature-icon--no">
+                <svg width="9" height="9" viewBox="0 0 16 16" fill="none"><path d="M5.5 10.5l5-5M10.5 10.5l-5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
               </span>
               {{ f }}
             </li>
           {% endfor %}
         </ul>
 
-        {% if customer %}
-          <div class="w-full py-4 text-center text-[10px] uppercase tracking-[0.2em] text-white/30 border border-white/10">Active Plan</div>
-        {% else %}
-          <a href="{{ routes.account_login_url }}" class="group/btn relative block w-full py-4 text-center text-[10px] uppercase tracking-[0.2em] font-bold overflow-hidden border border-white/20 transition-colors hover:border-white">
-            <span class="relative z-10">Get Started</span>
-            <div class="absolute inset-0 bg-white translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
-            <span class="absolute inset-0 z-20 flex items-center justify-center text-black opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300">Get Started</span>
-          </a>
-        {% endif %}
+        <div class="lp-plan-cta">
+          {% if customer %}
+            <div class="lp-plan-active">Active Plan</div>
+          {% else %}
+            <a href="{{ routes.account_login_url }}" class="lp-btn-outline lp-btn-outline--dark w-full block text-center">
+              Get Started
+            </a>
+          {% endif %}
+        </div>
       </div>
 
       {%- comment -%} Pro ── {%- endcomment -%}
-      <div class="group relative bg-white text-black p-10 md:p-12 overflow-hidden reveal" style="transition-delay: 200ms">
-        {%- comment -%} Shimmer effect {%- endcomment -%}
-        <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-black/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none"></div>
-        
-        <div class="absolute top-8 right-8 bg-black text-white text-[8px] uppercase tracking-[0.3em] px-3 py-1.5 font-bold">Recommended</div>
-        
-        <div class="flex justify-between items-start mb-12">
+      <div class="lp-plan lp-plan--pro reveal" style="transition-delay: 180ms">
+        <div class="lp-plan-badge">Recommended</div>
+
+        <div class="lp-plan-top">
           <div>
-            <p class="text-[10px] uppercase tracking-[0.2em] text-black/40 mb-4">The Full Experience</p>
-            <h2 class="font-display text-4xl">Layered Pro</h2>
+            <p class="lp-label lp-label--light mb-4">The Full Experience</p>
+            <h2 class="lp-plan-name lp-plan-name--pro">Layered Pro</h2>
           </div>
           <div class="text-right">
-            <span class="font-display text-5xl">£20</span>
-            <span class="text-[10px] uppercase tracking-widest text-black/30 block mt-1">Per Month</span>
+            <span class="lp-price lp-price--pro">£20</span>
+            <span class="lp-price-note lp-price-note--pro block">Per Month</span>
           </div>
         </div>
-        
-        <p class="text-sm text-black/60 mb-12 leading-relaxed">Everything you need to build a world-class wardrobe with zero friction.</p>
-        
-        <ul class="space-y-4 mb-16">
+
+        <p class="lp-plan-desc lp-plan-desc--pro">Everything you need to build a world-class wardrobe with zero friction.</p>
+
+        <ul class="lp-features">
           {%- assign pro_features = '15% off every order always,100 AI Virtual Try-On images,Free shipping on all orders,Priority access to new drops,Unlimited outfit saves,Unlimited AI Stylist,Early access to limited pieces,Dedicated style support' | split: ',' -%}
           {% for f in pro_features %}
-            <li class="flex items-center gap-4 text-sm font-medium">
-              <span class="w-5 h-5 rounded-full bg-black text-white flex items-center justify-center flex-shrink-0">
-                <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <li class="lp-feature lp-feature--pro-item">
+              <span class="lp-feature-icon lp-feature-icon--pro">
+                <svg width="9" height="9" viewBox="0 0 16 16" fill="none"><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
               {{ f }}
             </li>
           {% endfor %}
         </ul>
 
-        {% if customer and customer.tags contains 'Pro Member' %}
-          <div class="w-full py-4 text-center text-[10px] uppercase tracking-[0.2em] font-bold bg-black/5 text-black">Current Membership</div>
-        {% else %}
-          <a href="/cart/{{ pro_product.first_available_variant.id }}:1/checkout" class="group/btn relative block w-full py-4 text-center text-[10px] uppercase tracking-[0.2em] font-bold bg-black text-white overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98]">
-            <span class="relative z-10">Upgrade Now</span>
-          </a>
-          <p class="text-center text-[9px] uppercase tracking-widest text-black/40 mt-6 font-semibold">Instant Access · Cancel Anytime</p>
-        {% endif %}
+        <div class="lp-plan-cta">
+          {% if customer and customer.tags contains 'Pro Member' %}
+            <div class="lp-plan-active lp-plan-active--pro">Current Membership</div>
+          {% else %}
+            <a href="/cart/{{ pro_product.first_available_variant.id }}:1/checkout" class="lp-btn-primary-inv w-full block text-center">
+              Upgrade Now
+            </a>
+            <p class="lp-instant-note">Instant Access · Cancel Anytime</p>
+          {% endif %}
+        </div>
       </div>
 
     </div>
 
-    {%- comment -%} ── What Pro means concretely ── {%- endcomment -%}
-    <div class="pt-24 border-t border-white/10 mb-24">
-      <p class="text-[10px] tracking-[0.4em] uppercase text-white/40 mb-12 font-semibold">Pro Perks in Detail</p>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="bg-white/5 border border-white/5 p-10 hover:bg-white/10 transition-colors reveal" style="transition-delay: 300ms">
-          <p class="font-display text-5xl mb-6 text-transparent bg-clip-text bg-gradient-to-br from-white to-[#F2EBE3]/50">15%</p>
-          <p class="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-4 font-bold">Off Every Order</p>
-          <p class="text-sm text-white/50 leading-relaxed">Applied automatically at checkout, every single time. No codes, no hassle.</p>
+    {%- comment -%} ── Pro perks in detail ── {%- endcomment -%}
+    <div class="lp-perks-section mb-28">
+      <div class="lp-section-divider"></div>
+      <p class="lp-eyebrow mb-14">Pro Perks in Detail</p>
+      <div class="lp-perks-grid">
+
+        <div class="lp-perk reveal" style="transition-delay: 200ms">
+          <p class="lp-perk-stat">15%</p>
+          <p class="lp-perk-title">Off Every Order</p>
+          <p class="lp-perk-body">Applied automatically at checkout, every single time. No codes, no hassle.</p>
         </div>
-        <div class="bg-white/5 border border-white/5 p-10 hover:bg-white/10 transition-colors reveal" style="transition-delay: 400ms">
-          <p class="font-display text-5xl mb-6 text-transparent bg-clip-text bg-gradient-to-br from-white to-[#F2EBE3]/50">100</p>
-          <p class="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-4 font-bold">AI Generations</p>
-          <p class="text-sm text-white/50 leading-relaxed">Perfectly visualize any piece on yourself with high-fidelity AI virtual try-on.</p>
+
+        <div class="lp-perk reveal" style="transition-delay: 300ms">
+          <p class="lp-perk-stat">100</p>
+          <p class="lp-perk-title">AI Generations</p>
+          <p class="lp-perk-body">Perfectly visualize any piece on yourself with high-fidelity AI virtual try-on.</p>
         </div>
-        <div class="bg-white/5 border border-white/5 p-10 hover:bg-white/10 transition-colors reveal" style="transition-delay: 500ms">
-          <p class="font-display text-5xl mb-6 text-transparent bg-clip-text bg-gradient-to-br from-white to-[#F2EBE3]/50">1st</p>
-          <p class="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-4 font-bold">Priority Access</p>
-          <p class="text-sm text-white/50 leading-relaxed">Get notified 24 hours before anyone else when limited collections drop.</p>
+
+        <div class="lp-perk reveal" style="transition-delay: 400ms">
+          <p class="lp-perk-stat">1st</p>
+          <p class="lp-perk-title">Priority Access</p>
+          <p class="lp-perk-body">Get notified 24 hours before anyone else when limited collections drop.</p>
         </div>
+
       </div>
     </div>
 
     {%- comment -%} ── FAQ ── {%- endcomment -%}
-    <div class="max-w-2xl reveal" style="transition-delay: 600ms">
-      <p class="text-[10px] tracking-[0.4em] uppercase text-white/40 mb-12 font-semibold">Common Questions</p>
-      <div class="divide-y divide-white/10">
+    <div class="lp-faq-section reveal" style="transition-delay: 500ms">
+      <p class="lp-eyebrow mb-14">Common Questions</p>
+      <div class="lp-faq-list">
 
-        <details class="pr-faq group">
-          <summary class="py-6 text-sm uppercase tracking-wider font-semibold text-white/80 hover:text-white transition-colors">When does the 15% discount apply?</summary>
-          <p class="pb-6 text-sm text-white/40 leading-relaxed">It's applied automatically at checkout on every order while your membership is active. You'll see the savings reflected in your subtotal.</p>
+        <details class="pr-faq lp-faq-item">
+          <summary class="lp-faq-summary">When does the 15% discount apply?</summary>
+          <p class="lp-faq-body">It's applied automatically at checkout on every order while your membership is active. You'll see the savings reflected in your subtotal.</p>
         </details>
 
-        <details class="pr-faq group">
-          <summary class="py-6 text-sm uppercase tracking-wider font-semibold text-white/80 hover:text-white transition-colors">How do image generations work?</summary>
-          <p class="pb-6 text-sm text-white/40 leading-relaxed">Each time you use the "Virtual Try-On" feature to generate a preview of a product on your photo, it counts as one generation. Pro members get 100 per month.</p>
+        <details class="pr-faq lp-faq-item">
+          <summary class="lp-faq-summary">How do image generations work?</summary>
+          <p class="lp-faq-body">Each time you use the "Virtual Try-On" feature to generate a preview of a product on your photo, it counts as one generation. Pro members get 100 per month.</p>
         </details>
 
-        <details class="pr-faq group">
-          <summary class="py-6 text-sm uppercase tracking-wider font-semibold text-white/80 hover:text-white transition-colors">Can I cancel anytime?</summary>
-          <p class="pb-6 text-sm text-white/40 leading-relaxed">Absolutely. You can manage your subscription from your account dashboard. Your benefits will remain active until the end of your current billing cycle.</p>
+        <details class="pr-faq lp-faq-item">
+          <summary class="lp-faq-summary">Can I cancel anytime?</summary>
+          <p class="lp-faq-body">Absolutely. You can manage your subscription from your account dashboard. Your benefits will remain active until the end of your current billing cycle.</p>
         </details>
 
-        <details class="pr-faq group">
-          <summary class="py-6 text-sm uppercase tracking-wider font-semibold text-white/80 hover:text-white transition-colors">Is there a contract?</summary>
-          <p class="pb-6 text-sm text-white/40 leading-relaxed">No contracts or hidden fees. Layered Pro is a simple monthly subscription that you control.</p>
+        <details class="pr-faq lp-faq-item">
+          <summary class="lp-faq-summary">Is there a contract?</summary>
+          <p class="lp-faq-body">No contracts or hidden fees. Layered Pro is a simple monthly subscription that you control.</p>
         </details>
 
       </div>
@@ -205,7 +209,487 @@
 </div>
 
 <style>
-  /* ── Arbitrary Tailwind class fallbacks (not compiled into layered-app.css) ── */
+  /* ── Layered Pricing — Redesign ──────────────────────────────────────────── */
+  :root {
+    --beige: #F2EBE3;
+    --beige-dark: #E8DDD3;
+    --beige-mid: #D4C9BE;
+    --black: #0E0E0E;
+    --off-black: #1A1A1A;
+    --white: #FFFFFF;
+    --cream: #FAF8F5;
+  }
+
+  /* ── Base ───────────────────────────────────────────────────────────────── */
+  .lp-page {
+    background-color: var(--cream);
+    color: var(--black);
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .lp-bg-accent {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 55% 45% at 80% 15%, rgba(242,235,227,0.55) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 50% at 10% 85%, rgba(242,235,227,0.3) 0%, transparent 60%);
+    z-index: 0;
+  }
+
+  /* ── Navigation ─────────────────────────────────────────────────────────── */
+  .lp-nav {
+    background: rgba(250, 248, 245, 0.92);
+    border-bottom: 1px solid rgba(14, 14, 14, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: all 0.3s ease;
+  }
+
+  .lp-logo {
+    color: var(--black);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    text-decoration: none;
+  }
+
+  .lp-logo-mark {
+    width: 34px;
+    height: 34px;
+    background: var(--black);
+    color: var(--white);
+    border-radius: 50%;
+    font-family: 'Fraunces', serif;
+  }
+
+  .lp-nav-link {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 600;
+    color: rgba(14, 14, 14, 0.38);
+    transition: color 0.2s ease;
+    text-decoration: none;
+  }
+
+  .lp-nav-link:hover { color: var(--black); }
+  .lp-nav-link--active {
+    color: var(--black);
+    border-bottom: 1.5px solid var(--black);
+    padding-bottom: 2px;
+  }
+
+  .lp-hamburger {
+    background: none;
+    border: none;
+    color: var(--black);
+    cursor: pointer;
+    padding: 6px;
+  }
+
+  .lp-mobile-menu {
+    background: var(--cream);
+    border-top: 1px solid rgba(14, 14, 14, 0.08);
+  }
+
+  .lp-mobile-link {
+    font-family: 'Fraunces', serif;
+    font-size: 1.25rem;
+    color: rgba(14, 14, 14, 0.45);
+    text-decoration: none;
+    transition: color 0.2s;
+    font-style: italic;
+  }
+
+  .lp-mobile-link:hover,
+  .lp-mobile-link--active { color: var(--black); }
+
+  /* ── Hero ───────────────────────────────────────────────────────────────── */
+  .lp-pricing-hero { max-width: 700px; }
+
+  .lp-eyebrow {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4em;
+    color: rgba(14, 14, 14, 0.35);
+    font-weight: 600;
+    display: block;
+  }
+
+  .lp-display {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    color: var(--black);
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .lp-display--italic {
+    font-style: italic;
+    color: rgba(14, 14, 14, 0.22);
+  }
+
+  .lp-hero-rule {
+    width: 56px;
+    height: 1px;
+    background: var(--beige-mid);
+    margin-top: 2rem;
+  }
+
+  .lp-hero-body {
+    font-size: 1.05rem;
+    color: rgba(14, 14, 14, 0.5);
+    line-height: 1.7;
+    max-width: 400px;
+  }
+
+  /* ── Plans grid ─────────────────────────────────────────────────────────── */
+  .lp-plans-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  @media (min-width: 768px) {
+    .lp-plans-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .lp-plan {
+    padding: 3rem 3.5rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lp-plan--free {
+    background: var(--white);
+    border: 1px solid rgba(14, 14, 14, 0.08);
+    transition: border-color 0.3s ease;
+  }
+
+  .lp-plan--free:hover { border-color: rgba(14, 14, 14, 0.2); }
+
+  .lp-plan--pro {
+    background: var(--black);
+    color: var(--white);
+    overflow: hidden;
+  }
+
+  .lp-plan--pro::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 60%, rgba(242,235,227,0.06) 100%);
+    pointer-events: none;
+  }
+
+  .lp-plan-badge {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    background: var(--beige);
+    color: var(--black);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    font-weight: 700;
+    padding: 6px 14px;
+  }
+
+  .lp-plan-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 3rem;
+  }
+
+  .lp-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    color: rgba(14, 14, 14, 0.35);
+  }
+
+  .lp-label--light { color: rgba(255,255,255,0.35); }
+
+  .lp-plan-name {
+    font-family: 'Fraunces', serif;
+    font-size: 2.25rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--black);
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  .lp-plan-name--pro { color: var(--white); }
+
+  .lp-price {
+    font-family: 'Fraunces', serif;
+    font-size: 3rem;
+    font-weight: 400;
+    color: var(--black);
+    letter-spacing: -0.03em;
+  }
+
+  .lp-price--pro { color: var(--white); }
+
+  .lp-price-note {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+    color: rgba(14, 14, 14, 0.3);
+    margin-top: 4px;
+  }
+
+  .lp-price-note--pro { color: rgba(255,255,255,0.3); }
+
+  .lp-plan-desc {
+    font-size: 0.875rem;
+    color: rgba(14, 14, 14, 0.48);
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+  }
+
+  .lp-plan-desc--pro { color: rgba(255,255,255,0.48); }
+
+  /* ── Feature list ───────────────────────────────────────────────────────── */
+  .lp-features {
+    list-style: none;
+    margin: 0 0 2.5rem 0;
+    padding: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .lp-feature {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 0.875rem;
+  }
+
+  .lp-feature--yes { color: rgba(14, 14, 14, 0.72); font-weight: 500; }
+  .lp-feature--no  { color: rgba(14, 14, 14, 0.22); text-decoration: line-through; text-decoration-color: rgba(14,14,14,0.1); }
+  .lp-feature--pro-item { color: rgba(255,255,255,0.75); font-weight: 500; }
+
+  .lp-feature-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .lp-feature-icon--yes {
+    border: 1px solid rgba(14,14,14,0.18);
+    color: var(--black);
+  }
+
+  .lp-feature-icon--no {
+    border: 1px solid rgba(14,14,14,0.07);
+    color: rgba(14,14,14,0.2);
+  }
+
+  .lp-feature-icon--pro {
+    background: var(--beige);
+    color: var(--black);
+  }
+
+  /* ── CTA area ───────────────────────────────────────────────────────────── */
+  .lp-plan-cta { margin-top: auto; }
+
+  .lp-plan-active {
+    width: 100%;
+    padding: 14px;
+    text-align: center;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    color: rgba(14,14,14,0.3);
+    border: 1px solid rgba(14,14,14,0.1);
+  }
+
+  .lp-plan-active--pro {
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.4);
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  .lp-btn-outline--dark {
+    display: inline-block;
+    padding: 14px 24px;
+    border: 1.5px solid rgba(14,14,14,0.25);
+    color: var(--black);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    text-align: center;
+    background: transparent;
+  }
+
+  .lp-btn-outline--dark:hover {
+    background: var(--black);
+    color: var(--white);
+    border-color: var(--black);
+  }
+
+  .lp-btn-primary-inv {
+    display: inline-block;
+    padding: 15px 24px;
+    background: var(--beige);
+    color: var(--black);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s ease, opacity 0.2s;
+    text-align: center;
+  }
+
+  .lp-btn-primary-inv:hover { opacity: 0.88; transform: translateY(-1px); }
+  .lp-btn-primary-inv:active { transform: scale(0.98); }
+
+  .lp-instant-note {
+    text-align: center;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+    color: rgba(255,255,255,0.25);
+    margin-top: 1.25rem;
+  }
+
+  /* ── Pro perks section ──────────────────────────────────────────────────── */
+  .lp-section-divider {
+    width: 100%;
+    height: 1px;
+    background: rgba(14,14,14,0.08);
+    margin-bottom: 3.5rem;
+  }
+
+  .lp-perks-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  @media (min-width: 768px) {
+    .lp-perks-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .lp-perk {
+    background: var(--white);
+    border: 1px solid rgba(14,14,14,0.07);
+    padding: 2.5rem 2.75rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .lp-perk:hover {
+    border-color: rgba(14,14,14,0.15);
+    box-shadow: 0 6px 32px -8px rgba(14,14,14,0.08);
+  }
+
+  .lp-perk-stat {
+    font-family: 'Fraunces', serif;
+    font-size: 3.5rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--black);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .lp-perk-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    color: rgba(14,14,14,0.4);
+    margin-bottom: 0.75rem;
+  }
+
+  .lp-perk-body {
+    font-size: 0.875rem;
+    color: rgba(14,14,14,0.5);
+    line-height: 1.7;
+  }
+
+  /* ── FAQ ────────────────────────────────────────────────────────────────── */
+  .lp-faq-section { max-width: 640px; }
+
+  .lp-faq-list {
+    border-top: 1px solid rgba(14,14,14,0.08);
+  }
+
+  .lp-faq-item {
+    border-bottom: 1px solid rgba(14,14,14,0.08);
+  }
+
+  .lp-faq-summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+    padding: 1.5rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(14,14,14,0.7);
+    letter-spacing: 0.01em;
+    transition: color 0.2s ease;
+  }
+
+  .lp-faq-summary::-webkit-details-marker { display: none; }
+  .lp-faq-summary:hover { color: var(--black); }
+
+  .lp-faq-summary::after {
+    content: '+';
+    font-size: 1.4rem;
+    font-weight: 200;
+    color: rgba(14,14,14,0.25);
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+  }
+
+  .lp-faq-item[open] .lp-faq-summary::after {
+    content: '−';
+    transform: rotate(180deg);
+  }
+
+  .lp-faq-body {
+    padding-bottom: 1.5rem;
+    font-size: 0.875rem;
+    color: rgba(14,14,14,0.45);
+    line-height: 1.75;
+  }
+
+  /* ── Scroll reveal ──────────────────────────────────────────────────────── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s cubic-bezier(.22,1,.36,1), transform 0.8s cubic-bezier(.22,1,.36,1);
+  }
+  .reveal.active { opacity: 1; transform: translateY(0); }
+
+  /* ── Arbitrary Tailwind fallbacks ───────────────────────────────────────── */
   .text-\[10px\] { font-size: 10px; }
   .text-\[9px\]  { font-size: 9px; }
   .text-\[8px\]  { font-size: 8px; }
@@ -213,96 +697,15 @@
   .tracking-\[0\.3em\] { letter-spacing: .3em; }
   .tracking-\[0\.4em\] { letter-spacing: .4em; }
   .leading-\[0\.9\]    { line-height: .9; }
-  .blur-\[120px\]      { filter: blur(120px); }
-  .duration-1000       { transition-duration: 1000ms; }
-
-  /* Opacity-modified backgrounds */
-  .bg-white\/5   { background-color: rgb(255 255 255/.05); }
-  .bg-white\/10  { background-color: rgb(255 255 255/.10); }
-  .bg-white\/20  { background-color: rgb(255 255 255/.20); }
-  .bg-black\/5   { background-color: rgb(0 0 0/.05); }
-  .bg-black\/60  { background-color: rgb(0 0 0/.60); }
-  .bg-black\/95  { background-color: rgb(0 0 0/.95); }
-
-  /* Beige (#F2EBE3) accent — background blobs and gradient stat numbers */
-  .bg-\[\#F2EBE3\]\/5   { background-color: rgba(242,235,227,.05); }
-  .bg-\[\#F2EBE3\]\/10  { background-color: rgba(242,235,227,.10); }
-  .to-\[\#F2EBE3\]\/50  { --tw-gradient-to: rgba(242,235,227,.50); }
-
-  /* Opacity-modified borders */
-  .border-white\/5  { border-color: rgb(255 255 255/.05); }
-  .border-white\/10 { border-color: rgb(255 255 255/.10); }
-  .border-white\/20 { border-color: rgb(255 255 255/.20); }
-  .hover\:border-white\/20:hover { border-color: rgb(255 255 255/.20); }
-  .group:hover .group-hover\:border-white\/40 { border-color: rgb(255 255 255/.40); }
-
-  /* Opacity-modified text */
-  .text-white\/20 { color: rgb(255 255 255/.20); }
-  .text-white\/30 { color: rgb(255 255 255/.30); }
-  .text-white\/40 { color: rgb(255 255 255/.40); }
-  .text-white\/50 { color: rgb(255 255 255/.50); }
-  .text-white\/60 { color: rgb(255 255 255/.60); }
-  .text-white\/70 { color: rgb(255 255 255/.70); }
-  .text-white\/80 { color: rgb(255 255 255/.80); }
-  .text-black\/30 { color: rgb(0 0 0/.30); }
-  .text-black\/40 { color: rgb(0 0 0/.40); }
-  .text-black\/60 { color: rgb(0 0 0/.60); }
-  .decoration-white\/10 { text-decoration-color: rgb(255 255 255/.10); }
-
-  /* Gradient colour stops */
-  .to-white\/20 { --tw-gradient-to: rgb(255 255 255/.20); }
-  .to-white\/30 { --tw-gradient-to: rgb(255 255 255/.30); }
-
-  /* Backdrop blur */
   .backdrop-blur-sm  { -webkit-backdrop-filter: blur(4px);  backdrop-filter: blur(4px); }
   .backdrop-blur-xl  { -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); }
   .backdrop-blur-2xl { -webkit-backdrop-filter: blur(40px); backdrop-filter: blur(40px); }
-
-  /* Scale hover/active */
   .hover\:scale-\[1\.02\]:hover   { transform: scale(1.02); }
   .active\:scale-\[0\.98\]:active { transform: scale(.98); }
 
-  /* Named-group (group/btn) hover variants for animated Get Started button */
-  .group\/btn:hover .group-hover\/btn\:translate-y-0 { transform: translateY(0); }
-  .group\/btn:hover .group-hover\/btn\:opacity-100   { opacity: 1; }
-
-  /* ── FAQ accordion ─────────────────────────────────────────────────────── */
-  .pr-faq summary {
-    cursor: pointer;
-    list-style: none;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    user-select: none;
-  }
+  /* ── Legacy FAQ (kept for Shopify Liquid class) ── */
+  .pr-faq summary { cursor: pointer; list-style: none; }
   .pr-faq summary::-webkit-details-marker { display: none; }
-  .pr-faq summary::after {
-    content: '+';
-    font-size: 1.5rem;
-    font-weight: 200;
-    color: rgba(255,255,255,0.3);
-    flex-shrink: 0;
-    transition: transform 0.3s ease;
-  }
-  .pr-faq[open] summary::after { 
-    content: '−';
-    transform: rotate(180deg);
-  }
-  
-  .reveal {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .reveal.active {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 0.1; transform: scale(1); }
-    50% { opacity: 0.15; transform: scale(1.1); }
-  }
 </style>
 
 <script>
