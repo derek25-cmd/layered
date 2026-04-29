@@ -2,7 +2,7 @@
   Shopify Native Product Template with Virtual Try-On
 {%- endcomment -%}
 
-<div class="product-page container mx-auto py-12 px-4 max-w-6xl">
+<div class="product-page container mx-auto py-6 md:py-12 px-4 max-w-6xl">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
     
     <!-- Product Images -->
@@ -24,8 +24,8 @@
 
     <!-- Product Info & Virtual Try-On -->
     <div class="product-details flex flex-col">
-      <h1 class="text-4xl font-display font-bold mb-2">{{ product.title }}</h1>
-      <p class="text-2xl font-medium text-gray-700 mb-6">{{ product.price | money }}</p>
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-display font-bold mb-2">{{ product.title }}</h1>
+      <p class="text-xl md:text-2xl font-medium text-gray-700 mb-4 md:mb-6">{{ product.price | money }}</p>
       
       <div class="product-description text-gray-600 leading-relaxed mb-8">
         {{ product.description }}
@@ -75,10 +75,10 @@
       {% endform %}
 
       <!-- VIRTUAL TRY-ON AI FEATURE (Feature 5) -->
-      <div class="virtual-try-on-container border rounded-xl p-6 mt-8 bg-white shadow-sm ring-1 ring-border">
-        <div class="flex items-center gap-3 mb-4">
-          <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-          <h3 class="text-xl font-bold font-display">Virtual Try-On (AI)</h3>
+      <div class="virtual-try-on-container border rounded-xl p-4 md:p-6 mt-6 md:mt-8 bg-white shadow-sm ring-1 ring-border">
+        <div class="flex items-center gap-3 mb-3 md:mb-4">
+          <svg class="w-5 h-5 md:w-6 md:h-6 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+          <h3 class="text-lg md:text-xl font-bold font-display">Virtual Try-On (AI)</h3>
         </div>
         
         <p class="text-sm text-gray-600 mb-4">Upload a photo of yourself to see how this item looks on you.</p>

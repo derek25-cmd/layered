@@ -32,15 +32,32 @@
         font-family: 'Inter', system-ui, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
       }
       /* Ensure no Shopify admin bar overlap issues */
       #root {
         min-height: 100vh;
+        overflow-x: hidden;
       }
       /* Hide Shopify's default header/footer since the React app has its own */
       .shopify-section-group-header-group,
       .shopify-section-group-footer-group {
         display: none !important;
+      }
+      /* Global mobile safeguards */
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      /* Prevent table/form overflow on small screens */
+      table {
+        width: 100%;
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
       }
     </style>
   </head>

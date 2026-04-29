@@ -2,17 +2,17 @@
   Shopify Native Collection Template
 {%- endcomment -%}
 
-<div class="collection-page container mx-auto py-10 px-4">
-  <h1 class="text-4xl font-bold mb-8 text-center">{{ collection.title | default: 'Shop' }}</h1>
+<div class="collection-page container mx-auto py-6 md:py-10 px-4">
+  <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 md:mb-8 text-center">{{ collection.title | default: 'Shop' }}</h1>
 
   {%- comment -%}
     OUTFIT CATEGORIZATION (Feature 2)
     This creates a segregated Outfits section on the main shop collection page.
   {%- endcomment -%}
   {% if collection.handle == 'all' or collection.handle == 'frontpage' %}
-    <div class="outfits-section py-12 mb-10 border-b">
-      <h2 class="text-2xl font-bold mb-6">Curated Outfits</h2>
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="outfits-section py-8 md:py-12 mb-8 md:mb-10 border-b">
+      <h2 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">Curated Outfits</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {% assign outfit_collection = collections['outfits'] %}
         {% for outfit_product in outfit_collection.products limit: 4 %}
           <div class="outfit-card group cursor-pointer hover-lift relative overflow-hidden rounded-lg">
@@ -37,7 +37,7 @@
     STANDARD PRODUCT GRID
     Hiding the Layered Pro Plan using tags or handle (Feature 2)
   {%- endcomment -%}
-  <h2 class="text-2xl font-bold mb-6">All Products</h2>
+  <h2 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">All Products</h2>
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
     {% for product in collection.products %}
       {% unless product.tags contains 'Service' or product.handle == 'layered-pro-plan' %}
