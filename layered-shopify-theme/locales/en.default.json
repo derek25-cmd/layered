@@ -1,0 +1,16 @@
+{
+  "general": {
+    "title": "Layered",
+    "password_page": {
+      "title": "Opening soon",
+      "password_label": "Enter store password",
+      "enter": "Enter"
+    }
+  },
+  "gift_cards": {
+    "issued": {
+      "title": "Gift Card",
+      "subtext": "Your gift card"
+    }
+  }
+}

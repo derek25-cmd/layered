@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gift Card — {{ shop.name }}</title>
+  {{ content_for_header }}
+  <style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: #F5F2EC;
+      color: #1C1C1C;
+    }
+    .gc { text-align: center; max-width: 500px; padding: 2rem; }
+    h1 { font-family: 'Fraunces', serif; font-size: 2rem; }
+    .code {
+      font-family: monospace;
+      font-size: 1.5rem;
+      letter-spacing: 0.15em;
+      padding: 1rem 2rem;
+      border: 2px solid #1C1C1C;
+      display: inline-block;
+      margin: 1.5rem 0;
+    }
+    .balance { font-family: 'Fraunces', serif; font-size: 2.5rem; margin: 1rem 0; }
+    p { color: #666; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <div class="gc">
+    <h1>{{ shop.name }}</h1>
+    <p>Gift Card</p>
+    <div class="balance">{{ gift_card.balance | money }}</div>
+    <div class="code">{{ gift_card.code | format_code }}</div>
+    {% if gift_card.expired %}
+      <p>This gift card has expired.</p>
+    {% elsif gift_card.enabled %}
+      <p>Use this code at checkout.</p>
+    {% endif %}
+    {% if gift_card.pass_url %}
+      <p><a href="{{ gift_card.pass_url }}">Add to Apple Wallet</a></p>
+    {% endif %}
+  </div>
+</body>
+</html>

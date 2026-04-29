@@ -1,0 +1,59 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Layered",
+    "theme_version": "1.0.0",
+    "theme_author": "Layered",
+    "theme_documentation_url": "",
+    "theme_support_url": ""
+  },
+  {
+    "name": "Layered Settings",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Layered — React SPA Theme"
+      },
+      {
+        "type": "paragraph",
+        "content": "This theme renders the Layered React application. Product data is fetched via the Shopify Storefront API. Configure your Storefront API access token below."
+      },
+      {
+        "type": "text",
+        "id": "storefront_token",
+        "label": "Storefront API Access Token",
+        "info": "Create a Storefront API token in Settings > Apps and sales channels > Develop apps",
+        "default": "58025f273213cb806328e70183981dea"
+      },
+      {
+        "type": "text",
+        "id": "supabase_url",
+        "label": "Supabase Project URL",
+        "info": "Your Supabase project URL for auth and database features",
+        "default": ""
+      },
+      {
+        "type": "text",
+        "id": "supabase_anon_key",
+        "label": "Supabase Anon Key",
+        "info": "Your Supabase publishable (anon) key",
+        "default": ""
+      }
+    ]
+  },
+  {
+    "name": "Social media",
+    "settings": [
+      {
+        "type": "text",
+        "id": "social_instagram",
+        "label": "Instagram handle"
+      },
+      {
+        "type": "text",
+        "id": "social_twitter",
+        "label": "Twitter / X handle"
+      }
+    ]
+  }
+]

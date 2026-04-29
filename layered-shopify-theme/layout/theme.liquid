@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ page_title }} — {{ shop.name }}</title>
+    <meta name="description" content="{{ page_description | escape }}" />
+
+    {%- comment -%} Shopify required tags {%- endcomment -%}
+    {{ content_for_header }}
+
+    {%- comment -%} Favicon {%- endcomment -%}
+    <link rel="icon" type="image/x-icon" href="{{ 'favicon.ico' | asset_url }}" />
+
+    {%- comment -%} Google Fonts used by Layered {%- endcomment -%}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+    {%- comment -%} Layered app CSS {%- endcomment -%}
+    {{ 'layered-app.css' | asset_url | stylesheet_tag }}
+
+    {%- comment -%} 
+      Override Shopify's default body styles so the React app renders correctly.
+      Shopify themes sometimes add padding/margins or their own fonts.
+    {%- endcomment -%}
+    <style>
+      /* Reset any Shopify default theme styles */
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      /* Ensure no Shopify admin bar overlap issues */
+      #root {
+        min-height: 100vh;
+      }
+      /* Hide Shopify's default header/footer since the React app has its own */
+      .shopify-section-group-header-group,
+      .shopify-section-group-footer-group {
+        display: none !important;
+      }
+    </style>
+  </head>
+
+  <body>
+    {%- comment -%}
+      The React app mounts to #root. All Shopify page content is bypassed
+      because the SPA handles its own routing via react-router-dom.
+    {%- endcomment -%}
+    <div id="root"></div>
+
+    {%- comment -%}
+      Inject Shopify context as global variables so the React app 
+      can access shop data, cart, and customer info if needed.
+    {%- endcomment -%}
+    <script>
+      window.__SHOPIFY_CONTEXT__ = {
+        shopDomain: {{ shop.permanent_domain | json }},
+        shopName: {{ shop.name | json }},
+        currency: {{ shop.currency | json }},
+        locale: {{ request.locale.iso_code | json }},
+        customerId: {{ customer.id | json | default: 'null' }},
+        customerEmail: {{ customer.email | json | default: 'null' }},
+        customerName: {{ customer.name | json | default: 'null' }},
+        cartToken: {{ cart.token | json | default: 'null' }},
+        cartItemCount: {{ cart.item_count | json }},
+        isLoggedIn: {% if customer %}true{% else %}false{% endif %}
+      };
+    </script>
+
+    {%- comment -%} Layered React application bundle {%- endcomment -%}
+    <script type="module" src="{{ 'layered-app.js' | asset_url }}"></script>
+
+    {{ content_for_layout }}
+  </body>
+</html>
