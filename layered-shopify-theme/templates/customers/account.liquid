@@ -1,4 +1,35 @@
 {%- comment -%}
-  Customer account handled by React SPA's Account component
-  via Supabase auth. This template is a Shopify requirement.
+  Customer Dashboard Orders replacing the old React SPA component
 {%- endcomment -%}
+
+<div class="customer-dashboard max-w-6xl mx-auto py-10 px-4">
+  <h1 class="text-3xl font-bold mb-8">My Orders</h1>
+  
+  {% if customer.orders.size > 0 %}
+    <div class="grid gap-6">
+      {% for order in customer.orders %}
+        <div class="order-card border rounded-lg p-6 shadow-sm flex flex-col md:flex-row justify-between bg-white">
+          <div class="order-info mb-4 md:mb-0">
+            <h3 class="text-xl font-semibold">Order {{ order.name }}</h3>
+            <p class="text-gray-500 text-sm">{{ order.created_at | date: "%B %d, %Y" }}</p>
+            <div class="mt-2">
+              <span class="inline-block px-3 py-1 bg-gray-100 rounded-full text-xs font-medium">{{ order.financial_status_label }}</span>
+              <span class="inline-block px-3 py-1 bg-gray-100 rounded-full text-xs font-medium ml-2">{{ order.fulfillment_status_label }}</span>
+            </div>
+            <p class="font-bold mt-4">Total: {{ order.total_net_amount | money }}</p>
+          </div>
+          
+          <div class="order-items flex gap-2 overflow-x-auto">
+            {% for line_item in order.line_items %}
+              <div class="w-20 h-20 flex-shrink-0 border rounded overflow-hidden">
+                <img src="{{ line_item.image | image_url: width: 150 }}" alt="{{ line_item.title }}" class="w-full h-full object-cover">
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-gray-600">You haven't placed any orders yet.</p>
+  {% endif %}
+</div>

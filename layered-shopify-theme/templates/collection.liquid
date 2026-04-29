@@ -1,3 +1,64 @@
 {%- comment -%}
-  Collection pages are handled by the React SPA.
+  Shopify Native Collection Template
 {%- endcomment -%}
+
+<div class="collection-page container mx-auto py-10 px-4">
+  <h1 class="text-4xl font-bold mb-8 text-center">{{ collection.title | default: 'Shop' }}</h1>
+
+  {%- comment -%}
+    OUTFIT CATEGORIZATION (Feature 2)
+    This creates a segregated Outfits section on the main shop collection page.
+  {%- endcomment -%}
+  {% if collection.handle == 'all' or collection.handle == 'frontpage' %}
+    <div class="outfits-section py-12 mb-10 border-b">
+      <h2 class="text-2xl font-bold mb-6">Curated Outfits</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {% assign outfit_collection = collections['outfits'] %}
+        {% for outfit_product in outfit_collection.products limit: 4 %}
+          <div class="outfit-card group cursor-pointer hover-lift relative overflow-hidden rounded-lg">
+            <a href="{{ outfit_product.url }}">
+              <div class="aspect-[3/4] bg-gray-100 overflow-hidden">
+                <img src="{{ outfit_product.featured_image | image_url: width: 600 }}" alt="{{ outfit_product.title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+              </div>
+              <div class="p-4 bg-white">
+                <h3 class="font-semibold text-lg">{{ outfit_product.title }}</h3>
+                <p class="text-gray-600 mt-1">{{ outfit_product.price | money }}</p>
+              </div>
+            </a>
+          </div>
+        {% else %}
+          <p class="text-gray-500 italic">No curated outfits available right now. Please check back soon.</p>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  {%- comment -%}
+    STANDARD PRODUCT GRID
+    Hiding the Layered Pro Plan using tags or handle (Feature 2)
+  {%- endcomment -%}
+  <h2 class="text-2xl font-bold mb-6">All Products</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    {% for product in collection.products %}
+      {% unless product.tags contains 'Service' or product.handle == 'layered-pro-plan' %}
+        <div class="product-card group relative">
+          <a href="{{ product.url }}">
+            <div class="aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden mb-3">
+              <img src="{{ product.featured_image | image_url: width: 600 }}" alt="{{ product.title }}" class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
+            </div>
+            <h3 class="font-medium">{{ product.title }}</h3>
+            <p class="text-sm text-gray-600">{{ product.price | money }}</p>
+          </a>
+        </div>
+      {% endunless %}
+    {% else %}
+      <p class="col-span-full text-center text-gray-500">No products found in this collection.</p>
+    {% endfor %}
+  </div>
+  
+  {% if paginate.pages > 1 %}
+    <div class="pagination flex justify-center mt-10">
+      {{ paginate | default_pagination }}
+    </div>
+  {% endif %}
+</div>
