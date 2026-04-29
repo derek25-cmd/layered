@@ -1,0 +1,196 @@
+<div class="cust-page max-w-5xl mx-auto py-8 md:py-12 px-4">
+
+  {%- comment -%} ── Top utility bar ── {%- endcomment -%}
+  <div class="flex items-center justify-between mb-8 md:mb-10">
+    <a href="/" class="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-black transition-colors">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      Back to Homepage
+    </a>
+    {% if customer %}
+      <a href="{{ routes.account_logout_url }}" class="text-xs text-gray-400 hover:text-black transition-colors">Sign out</a>
+    {% endif %}
+  </div>
+
+  {%- comment -%} ── Nav tabs ── {%- endcomment -%}
+  {% if customer %}
+    <div class="flex gap-1 border-b mb-8 md:mb-10 overflow-x-auto">
+      <a href="/account" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition-colors whitespace-nowrap">Orders</a>
+      <a href="{{ routes.account_addresses_url }}" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition-colors whitespace-nowrap">Addresses</a>
+      <a href="/pages/profile" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition-colors whitespace-nowrap">Profile</a>
+      <span class="px-4 py-2 text-sm font-semibold border-b-2 border-black -mb-px whitespace-nowrap">Pricing</span>
+    </div>
+  {% endif %}
+
+  {%- comment -%} ── Page heading ── {%- endcomment -%}
+  <div class="text-center mb-12">
+    <p class="text-xs tracking-widest uppercase text-gray-400 mb-2">Membership</p>
+    <h1 class="text-3xl md:text-4xl font-bold mb-3">Simple, honest pricing</h1>
+    <p class="text-gray-500 text-sm max-w-md mx-auto">One plan. Every perk. Built for people who take their wardrobe seriously.</p>
+  </div>
+
+  {%- comment -%} ── Plan cards ── {%- endcomment -%}
+  <div class="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-12">
+
+    {%- comment -%} Free plan {%- endcomment -%}
+    <div class="border border-gray-200 rounded-2xl p-6 md:p-8 bg-white">
+      <div class="mb-6">
+        <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Free</p>
+        <p class="text-4xl font-bold">£0<span class="text-base font-normal text-gray-400">/mo</span></p>
+        <p class="text-sm text-gray-500 mt-2">The essentials, forever free.</p>
+      </div>
+      <ul class="pricing-features mb-8">
+        <li class="yes">Browse full catalogue</li>
+        <li class="yes">AI Stylist (5 suggestions/day)</li>
+        <li class="yes">Outfit builder (save up to 3)</li>
+        <li class="yes">Virtual Try-On (2 credits/day)</li>
+        <li class="no">20% off every order</li>
+        <li class="no">Free shipping on all orders</li>
+        <li class="no">Priority access to new drops</li>
+        <li class="no">Unlimited outfit saves</li>
+      </ul>
+      {% if customer %}
+        <span class="block text-center text-xs text-gray-400 py-3 border border-gray-200 rounded-lg">Your current plan</span>
+      {% else %}
+        <a href="{{ routes.account_login_url }}" class="block text-center text-sm font-semibold border border-black rounded-lg py-3 hover:bg-black hover:text-white transition-colors">
+          Get started free
+        </a>
+      {% endif %}
+    </div>
+
+    {%- comment -%} Pro plan {%- endcomment -%}
+    <div class="border-2 border-black rounded-2xl p-6 md:p-8 bg-black text-white relative overflow-hidden">
+      <div class="absolute top-4 right-4 bg-white text-black text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full">
+        Best value
+      </div>
+      <div class="mb-6">
+        <p class="text-xs font-semibold uppercase tracking-widest text-white/50 mb-1">Layered Pro</p>
+        <div id="pro-price">
+          <p class="text-4xl font-bold">£9.99<span class="text-base font-normal text-white/50">/mo</span></p>
+        </div>
+        <p class="text-sm text-white/60 mt-2">Everything in Free, plus:</p>
+      </div>
+      <ul class="pricing-features pricing-features--dark mb-8">
+        <li class="yes">20% off every order, always</li>
+        <li class="yes">Free shipping on all orders</li>
+        <li class="yes">Priority access to new drops</li>
+        <li class="yes">Unlimited outfit saves</li>
+        <li class="yes">Unlimited AI Stylist sessions</li>
+        <li class="yes">Unlimited Virtual Try-On credits</li>
+        <li class="yes">Early access to limited pieces</li>
+        <li class="yes">Dedicated style support</li>
+      </ul>
+
+      {% if customer and customer.tags contains 'Pro Member' %}
+        <span class="block text-center text-xs bg-white/20 text-white py-3 rounded-lg">
+          ✦ Active — enjoy your perks
+        </span>
+      {% else %}
+        <a href="/products/layered-pro-plan" class="block text-center bg-white text-black text-sm font-bold py-3 rounded-lg hover:bg-gray-100 transition-colors">
+          Upgrade to Pro
+        </a>
+        <p class="text-center text-xs text-white/40 mt-3">Cancel anytime · No hidden fees</p>
+      {% endif %}
+    </div>
+
+  </div>
+
+  {%- comment -%} ── FAQ ── {%- endcomment -%}
+  <div class="max-w-2xl mx-auto border-t pt-12">
+    <h2 class="text-lg font-bold mb-6 text-center">Common questions</h2>
+    <div class="space-y-4">
+      <details class="pricing-faq">
+        <summary>When does my 20% discount apply?</summary>
+        <p>The discount is applied automatically at checkout on every order while your Pro membership is active. No code needed.</p>
+      </details>
+      <details class="pricing-faq">
+        <summary>Can I cancel anytime?</summary>
+        <p>Yes. Cancel from your Shopify account page at any time with no penalty. Your perks remain active until the end of your billing period.</p>
+      </details>
+      <details class="pricing-faq">
+        <summary>Does the discount stack with sale prices?</summary>
+        <p>The Pro discount applies on top of standard prices. Sale items may have different terms noted on the product page.</p>
+      </details>
+      <details class="pricing-faq">
+        <summary>How do I access Pro features after subscribing?</summary>
+        <p>Your account is automatically upgraded. Sign out and back in if features don't appear immediately.</p>
+      </details>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .cust-page { font-family: 'Inter', system-ui, sans-serif; }
+
+  /* ── Feature lists ── */
+  .pricing-features {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    space-y: .5rem;
+  }
+  .pricing-features li {
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+    font-size: .875rem;
+    color: #374151;
+    padding: .3125rem 0;
+  }
+  .pricing-features li::before {
+    content: '';
+    display: block;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+  .pricing-features li.yes::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Ccircle cx='8' cy='8' r='7.5' stroke='%23111'/%3E%3Cpath d='M5 8l2 2 4-4' stroke='%23111' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+  .pricing-features li.no {
+    color: #9ca3af;
+  }
+  .pricing-features li.no::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Ccircle cx='8' cy='8' r='7.5' stroke='%23d1d5db'/%3E%3Cpath d='M5.5 10.5l5-5M10.5 10.5l-5-5' stroke='%23d1d5db' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+  .pricing-features--dark li { color: rgba(255,255,255,.85); }
+  .pricing-features--dark li.yes::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Ccircle cx='8' cy='8' r='7.5' stroke='rgba(255,255,255,.7)'/%3E%3Cpath d='M5 8l2 2 4-4' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+
+  /* ── FAQ ── */
+  .pricing-faq {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .pricing-faq summary {
+    cursor: pointer;
+    padding: .875rem 1.125rem;
+    font-size: .9375rem;
+    font-weight: 600;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+  }
+  .pricing-faq summary::-webkit-details-marker { display: none; }
+  .pricing-faq summary::after {
+    content: '+';
+    font-size: 1.125rem;
+    font-weight: 300;
+    color: #9ca3af;
+    flex-shrink: 0;
+  }
+  .pricing-faq[open] summary::after { content: '−'; }
+  .pricing-faq p {
+    padding: 0 1.125rem .875rem;
+    margin: 0;
+    font-size: .875rem;
+    color: #6b7280;
+    line-height: 1.6;
+  }
+</style>

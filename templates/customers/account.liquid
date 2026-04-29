@@ -5,27 +5,27 @@
 
 <div class="customer-dashboard max-w-5xl mx-auto py-8 md:py-12 px-4">
 
-  {%- comment -%} ── Header ── {%- endcomment -%}
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 md:mb-10">
-    <div>
-      <h1 class="text-2xl md:text-3xl font-bold">
-        Hello, {{ customer.first_name }}
-      </h1>
-      <p class="text-sm text-gray-500 mt-1">{{ customer.email }}</p>
-    </div>
-    <a
-      href="{{ routes.account_logout_url }}"
-      class="inline-block text-sm border border-gray-300 rounded-lg px-4 py-2 hover:border-black transition-colors self-start sm:self-auto"
-    >
-      Sign out
+  {%- comment -%} ── Top utility bar ── {%- endcomment -%}
+  <div class="flex items-center justify-between mb-8 md:mb-10">
+    <a href="/" class="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-black transition-colors">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      Back to Homepage
     </a>
+    <a href="{{ routes.account_logout_url }}" class="text-xs text-gray-400 hover:text-black transition-colors">Sign out</a>
+  </div>
+
+  {%- comment -%} ── Header ── {%- endcomment -%}
+  <div class="mb-8 md:mb-10">
+    <h1 class="text-2xl md:text-3xl font-bold">Hello, {{ customer.first_name }}</h1>
+    <p class="text-sm text-gray-500 mt-1">{{ customer.email }}</p>
   </div>
 
   {%- comment -%} ── Account nav tabs ── {%- endcomment -%}
-  <div class="flex gap-1 border-b mb-8 overflow-x-auto whitespace-nowrap">
-    <a href="/account" class="px-4 py-2 text-sm font-semibold {% if request.path == '/account' %}border-b-2 border-black -mb-px text-black{% else %}text-gray-500 hover:text-black{% endif %} transition-colors">Orders</a>
-    <a href="{{ routes.account_addresses_url }}" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition-colors">Addresses</a>
-    <a href="#preferences" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition-colors">Preferences & Pro</a>
+  <div class="flex gap-1 border-b mb-8 overflow-x-auto">
+    <a href="/account" class="px-4 py-2 text-sm font-semibold border-b-2 border-black -mb-px whitespace-nowrap">Orders</a>
+    <a href="{{ routes.account_addresses_url }}" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition-colors whitespace-nowrap">Addresses</a>
+    <a href="/pages/profile" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition-colors whitespace-nowrap">Profile</a>
+    <a href="/pages/pricing" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition-colors whitespace-nowrap">Pricing</a>
   </div>
 
   {%- comment -%} ── Layered Pro & Preferences Section ── {%- endcomment -%}
