@@ -1,3 +1,41 @@
-{%- comment -%}
-  Customer functionality handled by React SPA via Supabase auth.
-{%- endcomment -%}
+<div class="customer-login container mx-auto py-20 px-4 max-w-md">
+  <h1 class="text-3xl font-bold mb-8 text-center">Sign In</h1>
+
+  <div class="mb-8">
+    {%- comment -%} Oxi Social Login Integration {%- endcomment -%}
+    <div class="oxi-social-login mb-6"></div>
+    
+    <div class="relative flex items-center justify-center my-6">
+      <hr class="w-full border-gray-300">
+      <span class="absolute bg-white px-4 text-sm text-gray-500">or continue with email</span>
+    </div>
+  </div>
+
+  {% form 'customer_login' %}
+    {{ form.errors | default_errors }}
+
+    <div class="space-y-4">
+      <div class="field">
+        <label for="CustomerEmail" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+        <input type="email" name="customer[email]" id="CustomerEmail" autocomplete="email" class="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-black outline-none transition-colors" placeholder="Email">
+      </div>
+
+      <div class="field">
+        <label for="CustomerPassword" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <input type="password" name="customer[password]" id="CustomerPassword" autocomplete="current-password" class="w-full border-2 border-gray-200 rounded-lg p-3 focus:border-black outline-none transition-colors" placeholder="Password">
+      </div>
+
+      <div class="pt-4">
+        <button type="submit" class="w-full bg-black text-white font-bold py-4 rounded-lg hover:bg-gray-800 transition-colors shadow-elegant">
+          Sign In
+        </button>
+      </div>
+
+      <div class="text-center mt-4">
+        <a href="{{ routes.account_register_url }}" class="text-sm text-gray-600 hover:underline">
+          Don't have an account? Sign Up
+        </a>
+      </div>
+    </div>
+  {% endform %}
+</div>
