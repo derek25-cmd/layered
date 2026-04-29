@@ -4,35 +4,61 @@
 
 <div class="product-page container mx-auto py-6 md:py-12 px-4 max-w-6xl">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-    
+
     <!-- Product Images -->
     <div class="product-images">
       <div class="main-image bg-gray-100 rounded-lg overflow-hidden aspect-[3/4]">
-        <img src="{{ product.featured_image | image_url: width: 1000 }}" alt="{{ product.title }}" class="w-full h-full object-cover">
+        <img
+          id="main-product-image"
+          src="{{ product.selected_or_first_available_variant.featured_image | default: product.featured_image | image_url: width: 1000 }}"
+          alt="{{ product.title }}"
+          class="w-full h-full object-cover transition-opacity duration-200"
+        >
       </div>
-      <div class="thumbnails flex gap-4 mt-4 overflow-x-auto">
+
+      {%- comment -%}
+        Each thumbnail carries data-image-url (full-size) and data-variant-id
+        (the variant that "owns" this image, or blank for unlinked images).
+        JS reads these attributes — no inline onclick with URL params.
+      {%- endcomment -%}
+      <div class="thumbnails flex gap-3 mt-4 overflow-x-auto pb-2" id="thumbnail-strip">
         {% for image in product.images %}
-          <div 
-            class="thumbnail-item w-24 h-32 flex-shrink-0 bg-gray-100 rounded cursor-pointer border-2 border-transparent hover:border-black transition-colors overflow-hidden"
-            onclick="syncThumbnailToVariant('{{ image | image_url: width: 1000 }}')"
+          {%- assign linked_variant_id = '' -%}
+          {%- for variant in product.variants -%}
+            {%- if variant.featured_image and variant.featured_image.id == image.id -%}
+              {%- assign linked_variant_id = variant.id -%}
+            {%- endif -%}
+          {%- endfor -%}
+          <button
+            type="button"
+            class="thumbnail-item w-20 h-28 sm:w-24 sm:h-32 flex-shrink-0 bg-gray-100 rounded cursor-pointer border-2 border-transparent hover:border-gray-400 transition-colors overflow-hidden focus:outline-none focus:ring-2 focus:ring-black"
+            data-image-url="{{ image | image_url: width: 1000 }}"
+            data-variant-id="{{ linked_variant_id }}"
+            aria-label="View image {{ forloop.index }} of {{ product.images.size }}"
           >
-            <img src="{{ image | image_url: width: 200 }}" alt="{{ product.title }}" class="w-full h-full object-cover">
-          </div>
+            <img src="{{ image | image_url: width: 200 }}" alt="{{ product.title }}" class="w-full h-full object-cover pointer-events-none">
+          </button>
         {% endfor %}
       </div>
     </div>
 
-    <!-- Product Info & Virtual Try-On -->
+    <!-- Product Info & Variant Selectors -->
     <div class="product-details flex flex-col">
       <h1 class="text-2xl sm:text-3xl md:text-4xl font-display font-bold mb-2">{{ product.title }}</h1>
-      <p class="text-xl md:text-2xl font-medium text-gray-700 mb-4 md:mb-6">{{ product.price | money }}</p>
-      
+      <p
+        id="product-price"
+        class="text-xl md:text-2xl font-medium text-gray-700 mb-4 md:mb-6"
+        data-product-price
+      >
+        {{ product.selected_or_first_available_variant.price | money }}
+      </p>
+
       <div class="product-description text-gray-600 leading-relaxed mb-8">
         {{ product.description }}
       </div>
 
-      <!-- Add to Cart Form with Dropdown Selectors (Feature 3) -->
-      {% form 'product', product, class: 'product-form mt-4' %}
+      <!-- Add to Cart Form -->
+      {% form 'product', product, class: 'product-form' %}
         <div class="variant-selectors space-y-4 mb-6">
           {% if product.variants.size > 1 %}
             {% for option in product.options_with_values %}
@@ -40,15 +66,16 @@
                 <label class="block text-sm font-bold text-gray-700 mb-2" for="Option{{ forloop.index }}">
                   {{ option.name }}
                 </label>
-                <select 
-                  id="Option{{ forloop.index }}" 
+                <select
+                  id="Option{{ forloop.index }}"
                   class="variant-select w-full border-2 border-gray-200 rounded-lg p-3 focus:border-black outline-none transition-colors"
-                  onchange="updateVariant()"
+                  data-option-index="{{ forloop.index0 }}"
                 >
                   {% for value in option.values %}
-                    <option value="{{ value | escape }}" {% if option.selected_value == value %}selected="selected"{% endif %}>
-                      {{ value }}
-                    </option>
+                    <option
+                      value="{{ value | escape }}"
+                      {% if option.selected_value == value %}selected="selected"{% endif %}
+                    >{{ value }}</option>
                   {% endfor %}
                 </select>
               </div>
@@ -56,49 +83,47 @@
           {% endif %}
         </div>
 
-        <!-- Hidden master selector for Shopify to process the form -->
-        <select name="id" id="variant-id" class="hidden">
+        {%- comment -%} Hidden master variant selector Shopify processes on form submit {%- endcomment -%}
+        <select name="id" id="variant-id" class="hidden" aria-hidden="true">
           {% for variant in product.variants %}
-            <option value="{{ variant.id }}" 
+            <option
+              value="{{ variant.id }}"
               data-price="{{ variant.price | money }}"
+              data-price-raw="{{ variant.price }}"
               data-image="{{ variant.featured_image | image_url: width: 1000 }}"
+              data-available="{{ variant.available }}"
               {% if variant == product.selected_or_first_available_variant %}selected="selected"{% endif %}
-            >
-              {{ variant.title }}
-            </option>
+            >{{ variant.title }}</option>
           {% endfor %}
         </select>
 
-        <button type="submit" class="w-full bg-black text-white font-bold py-4 rounded-lg hover:bg-gray-800 transition-colors mb-4 shadow-elegant">
+        <button
+          type="submit"
+          id="add-to-cart-btn"
+          class="w-full bg-black text-white font-bold py-4 rounded-lg hover:bg-gray-800 transition-colors mb-4 shadow-elegant disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Add to Cart
         </button>
       {% endform %}
 
-      <!-- VIRTUAL TRY-ON AI FEATURE (Feature 5) -->
+      <!-- VIRTUAL TRY-ON AI FEATURE -->
       <div class="virtual-try-on-container border rounded-xl p-4 md:p-6 mt-6 md:mt-8 bg-white shadow-sm ring-1 ring-border">
         <div class="flex items-center gap-3 mb-3 md:mb-4">
-          <svg class="w-5 h-5 md:w-6 md:h-6 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+          <svg class="w-5 h-5 md:w-6 md:h-6 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
           <h3 class="text-lg md:text-xl font-bold font-display">Virtual Try-On (AI)</h3>
         </div>
-        
         <p class="text-sm text-gray-600 mb-4">Upload a photo of yourself to see how this item looks on you.</p>
-
         <div class="vto-upload-area mb-4">
           <input type="file" id="vto-user-image" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-colors cursor-pointer border border-dashed border-gray-300 rounded-md p-2">
         </div>
-
-        <button id="vto-generate-btn" class="w-full border-2 border-black bg-white text-black font-bold py-3 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors relative overflow-hidden group">
-          <span class="relative z-10">Generate AI Preview</span>
+        <button id="vto-generate-btn" class="w-full border-2 border-black bg-white text-black font-bold py-3 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          Generate AI Preview
         </button>
-
-        <!-- Loading State -->
         <div id="vto-loading" class="hidden mt-6 flex flex-col items-center justify-center p-8 border rounded bg-gray-50">
-          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
           <p class="mt-4 text-sm font-medium text-gray-700">AI is rendering your look...</p>
         </div>
-
-        <!-- Result State -->
-        <div id="vto-result-container" class="hidden mt-6 animate-fade-in">
+        <div id="vto-result-container" class="hidden mt-6">
           <h4 class="font-medium mb-3 text-center">Your Virtual Look</h4>
           <div class="aspect-[3/4] rounded-lg overflow-hidden border shadow-sm">
             <img id="vto-result-image" src="" alt="Virtual Try-On Result" class="w-full h-full object-cover">
@@ -110,118 +135,178 @@
 </div>
 
 <script>
-// Master Product Data for JS Sync
-const productVariants = [
-  {% for variant in product.variants %}
+(function () {
+  // ─── Variant data built by Liquid at render time ───────────────────────────
+  const VARIANTS = [
+    {% for variant in product.variants %}
     {
       id: {{ variant.id }},
       title: {{ variant.title | json }},
       price: {{ variant.price | money | json }},
+      available: {{ variant.available | json }},
       image: {{ variant.featured_image | image_url: width: 1000 | json }},
-      options: [
-        {% for option in variant.options %}
-          {{ option | json }}{% unless forloop.last %},{% endunless %}
-        {% endfor %}
-      ]
+      options: [{% for opt in variant.options %}{{ opt | json }}{% unless forloop.last %},{% endunless %}{% endfor %}]
     }{% unless forloop.last %},{% endunless %}
-  {% endfor %}
-];
+    {% endfor %}
+  ];
 
-function updateVariant() {
-  const selects = document.querySelectorAll('.variant-select');
-  const selectedOptions = Array.from(selects).map(select => select.value);
-  
-  // Find the variant that matches all selected options
-  const matchedVariant = productVariants.find(variant => {
-    return variant.options.every((option, index) => option === selectedOptions[index]);
+  // ─── Cached DOM references ─────────────────────────────────────────────────
+  const mainImage    = document.getElementById('main-product-image');
+  const priceEl      = document.getElementById('product-price');
+  const variantIdSel = document.getElementById('variant-id');
+  const addToCartBtn = document.getElementById('add-to-cart-btn');
+  const selects      = Array.from(document.querySelectorAll('.variant-select'));
+  const thumbnails   = Array.from(document.querySelectorAll('.thumbnail-item'));
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  // Strip Shopify CDN query params so "image_1000x.jpg?v=123" === "image_1000x.jpg?v=456"
+  function baseUrl(url) {
+    if (!url) return '';
+    return url.split('?')[0];
+  }
+
+  function findVariantByOptions(optionValues) {
+    return VARIANTS.find(v =>
+      v.options.every((opt, i) => opt === optionValues[i])
+    ) || null;
+  }
+
+  // ─── Core: apply a matched variant to all UI elements ─────────────────────
+  function applyVariant(variant) {
+    if (!variant) return;
+
+    // 1. Hidden select (used by Shopify add-to-cart form)
+    variantIdSel.value = variant.id;
+
+    // 2. Price
+    priceEl.textContent = variant.price;
+
+    // 3. Add-to-cart availability
+    if (addToCartBtn) {
+      addToCartBtn.disabled = !variant.available;
+      addToCartBtn.textContent = variant.available ? 'Add to Cart' : 'Sold Out';
+    }
+
+    // 4. Main image (only update if this variant has its own image)
+    if (variant.image) {
+      setMainImage(variant.image);
+    }
+
+    // 5. URL (no page reload)
+    history.replaceState(null, '', window.location.pathname + '?variant=' + variant.id);
+
+    // 6. Highlight the matching thumbnail
+    highlightThumbnail(variant.image);
+  }
+
+  function setMainImage(url) {
+    if (!url || !mainImage) return;
+    mainImage.style.opacity = '0.6';
+    mainImage.src = url;
+    mainImage.onload = () => { mainImage.style.opacity = '1'; };
+  }
+
+  // Active thumbnail: border-black + ring
+  function highlightThumbnail(activeImageUrl) {
+    const activeBase = baseUrl(activeImageUrl);
+    thumbnails.forEach(thumb => {
+      const thumbBase = baseUrl(thumb.dataset.imageUrl);
+      const isActive  = activeBase && thumbBase === activeBase;
+      thumb.classList.toggle('border-black', isActive);
+      thumb.classList.toggle('border-transparent', !isActive);
+    });
+  }
+
+  // ─── Event: dropdown variant select → applyVariant ────────────────────────
+  selects.forEach(sel => {
+    sel.addEventListener('change', () => {
+      const chosen = selects.map(s => s.value);
+      applyVariant(findVariantByOptions(chosen));
+    });
   });
 
-  if (matchedVariant) {
-    // 1. Update Hidden ID
-    document.getElementById('variant-id').value = matchedVariant.id;
-    
-    // 2. Update Price
-    const priceDisplay = document.querySelector('.product-details p.text-2xl');
-    if (priceDisplay) priceDisplay.innerText = matchedVariant.price;
-    
-    // 3. Update Main Image
-    if (matchedVariant.image) {
-      document.querySelector('.main-image img').src = matchedVariant.image;
-    }
-    
-    // 4. Update URL without refresh
-    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?variant=' + matchedVariant.id;
-    window.history.replaceState({path: newUrl}, '', newUrl);
-  }
-}
+  // ─── Event: thumbnail click → update image + sync dropdowns ───────────────
+  // Uses event delegation on the strip for performance.
+  document.getElementById('thumbnail-strip').addEventListener('click', e => {
+    const thumb = e.target.closest('.thumbnail-item');
+    if (!thumb) return;
 
-function syncThumbnailToVariant(imgUrl) {
-  // 1. Update Main Image View
-  document.querySelector('.main-image img').src = imgUrl;
+    const imageUrl  = thumb.dataset.imageUrl;
+    const variantId = parseInt(thumb.dataset.variantId, 10);
 
-  // 2. Find if any variant is associated with this image
-  const matchedVariant = productVariants.find(variant => variant.image === imgUrl);
-  
-  if (matchedVariant) {
-    // Update the dropdowns to match this variant's options
-    const selects = document.querySelectorAll('.variant-select');
-    matchedVariant.options.forEach((option, index) => {
-      if (selects[index]) {
-        selects[index].value = option;
-      }
-    });
-    // Trigger the update logic (URL, Price, etc.)
-    updateVariant();
-  }
-}
+    // Always update the main image immediately
+    setMainImage(imageUrl);
+    highlightThumbnail(imageUrl);
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Virtual Try-On Logic (Existing)
-  const fileInput = document.getElementById('vto-user-image');
-  const generateBtn = document.getElementById('vto-generate-btn');
-  const loadingState = document.getElementById('vto-loading');
-  const resultContainer = document.getElementById('vto-result-container');
-  const resultImage = document.getElementById('vto-result-image');
-  
-  const productImageUrl = "{{ product.featured_image | image_url: width: 1000 }}";
-  const apiEndpoint = "https://your-project.supabase.co/functions/v1/virtual-try-on";
-
-  if (generateBtn) {
-    generateBtn.addEventListener('click', async () => {
-      if (!fileInput.files || fileInput.files.length === 0) {
-        alert("Please upload your photo first.");
+    if (variantId) {
+      // This thumbnail is linked to a specific variant — apply it fully
+      const variant = VARIANTS.find(v => v.id === variantId);
+      if (variant) {
+        // Sync dropdowns to this variant's options
+        selects.forEach((sel, i) => {
+          if (variant.options[i] !== undefined) sel.value = variant.options[i];
+        });
+        applyVariant(variant);
         return;
       }
+    }
 
-      const userFile = fileInput.files[0];
-      generateBtn.disabled = true;
-      loadingState.classList.remove('hidden');
-      resultContainer.classList.add('hidden');
+    // Thumbnail has no variant link — try fuzzy match by base image URL
+    const matched = VARIANTS.find(v => baseUrl(v.image) === baseUrl(imageUrl));
+    if (matched) {
+      selects.forEach((sel, i) => {
+        if (matched.options[i] !== undefined) sel.value = matched.options[i];
+      });
+      applyVariant(matched);
+    }
+  });
+
+  // ─── Init: highlight the first active thumbnail on page load ──────────────
+  (function init() {
+    const selected = variantIdSel
+      ? VARIANTS.find(v => v.id === parseInt(variantIdSel.value, 10))
+      : null;
+    if (selected && selected.image) highlightThumbnail(selected.image);
+  })();
+
+  // ─── Virtual Try-On ───────────────────────────────────────────────────────
+  const vtoFileInput     = document.getElementById('vto-user-image');
+  const vtoBtn           = document.getElementById('vto-generate-btn');
+  const vtoLoading       = document.getElementById('vto-loading');
+  const vtoResultWrap    = document.getElementById('vto-result-container');
+  const vtoResultImg     = document.getElementById('vto-result-image');
+  const VTO_ENDPOINT     = 'https://your-project.supabase.co/functions/v1/virtual-try-on';
+
+  if (vtoBtn) {
+    vtoBtn.addEventListener('click', async () => {
+      if (!vtoFileInput.files || !vtoFileInput.files.length) {
+        alert('Please upload your photo first.');
+        return;
+      }
+      vtoBtn.disabled = true;
+      vtoLoading.classList.remove('hidden');
+      vtoResultWrap.classList.add('hidden');
 
       try {
-        const formData = new FormData();
-        formData.append('user_image', userFile);
-        formData.append('product_image_url', document.querySelector('.main-image img').src);
-        
-        const response = await fetch(apiEndpoint, {
-          method: 'POST',
-          body: formData
-        });
+        const body = new FormData();
+        body.append('user_image', vtoFileInput.files[0]);
+        body.append('product_image_url', mainImage.src);
 
-        if (!response.ok) throw new Error('Failed to generate image');
-        const data = await response.json();
-        resultImage.src = data.image_url;
-        loadingState.classList.add('hidden');
-        resultContainer.classList.remove('hidden');
+        const res  = await fetch(VTO_ENDPOINT, { method: 'POST', body });
+        if (!res.ok) throw new Error('Generation failed');
+        const data = await res.json();
 
-      } catch (error) {
-        console.error("VTO Error:", error);
-        alert("An error occurred during generation. Please try again.");
-        loadingState.classList.add('hidden');
+        vtoResultImg.src = data.image_url;
+        vtoResultWrap.classList.remove('hidden');
+      } catch (err) {
+        console.error('VTO error:', err);
+        alert('An error occurred. Please try again.');
       } finally {
-        generateBtn.disabled = false;
+        vtoBtn.disabled = false;
+        vtoLoading.classList.add('hidden');
       }
     });
   }
-});
+})();
 </script>
