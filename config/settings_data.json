@@ -1,9 +1,28 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "current": {
     "storefront_token": "58025f273213cb806328e70183981dea",
     "supabase_url": "",
     "supabase_anon_key": "",
     "social_instagram": "",
-    "social_twitter": ""
+    "social_twitter": "",
+    "content_for_index": [],
+    "blocks": {
+      "16548475241908962911": {
+        "type": "shopify://apps/oxi-social-login/blocks/social-login-embed/24ad60bc-8f09-42fa-807e-e5eda0fdae17",
+        "disabled": false,
+        "settings": {
+          "enabled_on_page": "account"
+        }
+      }
+    }
   }
 }
