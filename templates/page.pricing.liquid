@@ -1,167 +1,201 @@
 {% comment %} Pricing — uses SPA design tokens from layered-app.css {% endcomment %}
 
 {%- comment -%} ── Minimal site nav for native pages ── {%- endcomment -%}
-<header class="fixed top-0 inset-x-0 z-50 border-b border-foreground/10 bg-background/80 backdrop-blur-md">
-  <div class="container max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-    <a href="/" class="font-display text-xl text-foreground">Layered</a>
-    <nav class="hidden md:flex items-center gap-7">
-      <a href="/collections/all" class="text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">Shop</a>
-      <a href="/outfits" class="text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">Outfits</a>
-      <a href="/ai-assistant" class="text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">AI Stylist</a>
-      <a href="/pages/profile" class="text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">Profile</a>
-      <a href="/pages/pricing" class="text-xs uppercase tracking-wider text-foreground border-b border-foreground pb-0.5">Pricing</a>
+<header class="fixed top-0 inset-x-0 z-50 border-b border-white/5 bg-black/60 backdrop-blur-xl transition-colors duration-300">
+  <div class="container max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <a href="/" class="font-display text-2xl tracking-tighter text-white group flex items-center gap-2">
+      <span class="w-8 h-8 bg-white text-black rounded-full flex items-center justify-center font-bold text-base transition-transform group-hover:rotate-12">L</span>
+      Layered
+    </a>
+    <nav class="hidden md:flex items-center gap-8">
+      <a href="/collections/all" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Shop</a>
+      <a href="/outfits" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Outfits</a>
+      <a href="/ai-assistant" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">AI Stylist</a>
+      <a href="/pages/profile" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Profile</a>
+      <a href="/pages/pricing" class="text-[10px] uppercase tracking-[0.2em] text-white border-b border-white pb-1">Pricing</a>
       {% if customer %}
-        <a href="/account" class="text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">Account</a>
+        <a href="/account" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Account</a>
       {% else %}
-        <a href="{{ routes.account_login_url }}" class="text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">Sign in</a>
+        <a href="{{ routes.account_login_url }}" class="text-[10px] uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Sign in</a>
       {% endif %}
     </nav>
-    <button id="pr-menu-toggle" class="md:hidden p-2 -mr-2 text-foreground" aria-label="Menu">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <button id="pr-menu-toggle" class="md:hidden p-2 -mr-2 text-white" aria-label="Menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h18M3 16h18"/></svg>
     </button>
   </div>
-  <div id="pr-mobile-menu" class="md:hidden hidden border-t border-foreground/10 bg-background">
-    <div class="container max-w-7xl mx-auto px-4 py-5 flex flex-col gap-4">
-      <a href="/collections/all" class="text-base font-display text-foreground/70 hover:text-foreground">Shop</a>
-      <a href="/outfits" class="text-base font-display text-foreground/70 hover:text-foreground">Outfits</a>
-      <a href="/ai-assistant" class="text-base font-display text-foreground/70 hover:text-foreground">AI Stylist</a>
-      <a href="/pages/profile" class="text-base font-display text-foreground/70 hover:text-foreground">Profile</a>
-      <a href="/pages/pricing" class="text-base font-display text-foreground">Pricing</a>
+  <div id="pr-mobile-menu" class="md:hidden hidden border-t border-white/5 bg-black/95 backdrop-blur-2xl">
+    <div class="container max-w-7xl mx-auto px-6 py-8 flex flex-col gap-6">
+      <a href="/collections/all" class="text-xl font-display text-white/70 hover:text-white">Shop</a>
+      <a href="/outfits" class="text-xl font-display text-white/70 hover:text-white">Outfits</a>
+      <a href="/ai-assistant" class="text-xl font-display text-white/70 hover:text-white">AI Stylist</a>
+      <a href="/pages/profile" class="text-xl font-display text-white/70 hover:text-white">Profile</a>
+      <a href="/pages/pricing" class="text-xl font-display text-white">Pricing</a>
       {% if customer %}
-        <a href="/account" class="text-base font-display text-foreground/70 hover:text-foreground">Account</a>
+        <a href="/account" class="text-xl font-display text-white/70 hover:text-white">Account</a>
       {% else %}
-        <a href="{{ routes.account_login_url }}" class="text-base font-display text-foreground/70 hover:text-foreground">Sign in</a>
+        <a href="{{ routes.account_login_url }}" class="text-xl font-display text-white/70 hover:text-white">Sign in</a>
       {% endif %}
     </div>
   </div>
 </header>
 
-<div class="min-h-screen bg-background text-foreground pt-14">
-  <div class="container max-w-7xl mx-auto px-4 py-16 md:py-20">
+<div class="min-h-screen bg-black text-white pt-16 overflow-hidden">
+  {%- assign pro_product = all_products['layered-pro-plan'] -%}
+  
+  {%- comment -%} Background decorative elements {%- endcomment -%}
+  <div class="fixed inset-0 pointer-events-none overflow-hidden">
+    <div class="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse"></div>
+    <div class="absolute top-[20%] -right-[10%] w-[50%] h-[50%] bg-blue-500/10 blur-[120px] rounded-full animate-pulse" style="animation-delay: 2s"></div>
+  </div>
+
+  <div class="container max-w-7xl mx-auto px-6 py-20 relative z-10">
 
     {%- comment -%} ── Heading ── {%- endcomment -%}
-    <div class="max-w-2xl mb-16 md:mb-20">
-      <p class="text-xs tracking-[0.25em] uppercase text-muted-foreground mb-3">Membership</p>
-      <h1 class="font-display text-5xl md:text-7xl leading-tight mb-4">Simple, honest<span class="italic"> pricing.</span></h1>
-      <p class="text-sm text-muted-foreground max-w-md">One plan. Every perk. For people who build their wardrobe with intention.</p>
+    <div class="max-w-3xl mb-24 reveal">
+      <p class="text-[10px] tracking-[0.4em] uppercase text-white/40 mb-6 font-semibold">Elevate your experience</p>
+      <h1 class="font-display text-6xl md:text-8xl leading-[0.9] tracking-tighter mb-8">Premium care for your <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/30 italic">style.</span></h1>
+      <p class="text-lg text-white/50 max-w-md leading-relaxed">Choose the plan that fits your journey. One for the essentials, one for those who want it all.</p>
     </div>
 
     {%- comment -%} ── Plans ── {%- endcomment -%}
-    <div class="grid md:grid-cols-2 gap-px bg-foreground/10 mb-16 md:mb-20">
+    <div class="grid md:grid-cols-2 gap-8 mb-24">
 
       {%- comment -%} Free ── {%- endcomment -%}
-      <div class="bg-background p-8 md:p-10">
-        <p class="text-[10px] uppercase tracking-widest text-muted-foreground mb-4">Free</p>
-        <div class="mb-6">
-          <span class="font-display text-6xl">£0</span>
-          <span class="text-sm text-muted-foreground">/month</span>
+      <div class="group bg-white/5 border border-white/10 p-10 md:p-12 backdrop-blur-sm hover:border-white/20 transition-all duration-500 reveal" style="transition-delay: 100ms">
+        <div class="flex justify-between items-start mb-12">
+          <div>
+            <p class="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-4">The Starting Point</p>
+            <h2 class="font-display text-4xl">Essential</h2>
+          </div>
+          <div class="text-right">
+            <span class="font-display text-5xl">£0</span>
+            <span class="text-[10px] uppercase tracking-widest text-white/30 block mt-1">Forever</span>
+          </div>
         </div>
-        <p class="text-sm text-muted-foreground mb-8">The essentials, always free.</p>
-        <ul class="space-y-3 mb-10">
+        
+        <p class="text-sm text-white/40 mb-12 leading-relaxed">Perfect for discovering your style and exploring the Layered catalogue.</p>
+        
+        <ul class="space-y-4 mb-16">
           {%- assign free_features = 'Full product catalogue,AI Stylist (5/day),Outfit builder (save up to 3),Virtual Try-On (2/day)' | split: ',' -%}
-          {%- assign free_no = '20% off every order,Free shipping,Priority new drops,Unlimited saves' | split: ',' -%}
+          {%- assign free_no = '15% off every order,Free shipping,Priority new drops,Unlimited saves' | split: ',' -%}
           {% for f in free_features %}
-            <li class="flex items-center gap-3 text-sm">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7.5" stroke="currentColor" stroke-opacity=".4"/><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <li class="flex items-center gap-4 text-sm text-white/70">
+              <span class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center flex-shrink-0 group-hover:border-white/40 transition-colors">
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
               {{ f }}
             </li>
           {% endfor %}
           {% for f in free_no %}
-            <li class="flex items-center gap-3 text-sm text-muted-foreground/50">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7.5" stroke="currentColor" stroke-opacity=".2"/><path d="M5.5 10.5l5-5M10.5 10.5l-5-5" stroke="currentColor" stroke-opacity=".3" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <li class="flex items-center gap-4 text-sm text-white/20 line-through decoration-white/10">
+              <span class="w-5 h-5 rounded-full border border-white/5 flex items-center justify-center flex-shrink-0">
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M5.5 10.5l5-5M10.5 10.5l-5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </span>
               {{ f }}
             </li>
           {% endfor %}
         </ul>
+
         {% if customer %}
-          <div class="border border-foreground/10 px-6 py-3 text-center text-xs uppercase tracking-wider text-muted-foreground">Your current plan</div>
+          <div class="w-full py-4 text-center text-[10px] uppercase tracking-[0.2em] text-white/30 border border-white/10">Active Plan</div>
         {% else %}
-          <a href="{{ routes.account_login_url }}" class="block text-center border border-foreground/20 px-6 py-3 text-xs uppercase tracking-wider hover:border-foreground transition-colors">
-            Get started free
+          <a href="{{ routes.account_login_url }}" class="group/btn relative block w-full py-4 text-center text-[10px] uppercase tracking-[0.2em] font-bold overflow-hidden border border-white/20 transition-colors hover:border-white">
+            <span class="relative z-10">Get Started</span>
+            <div class="absolute inset-0 bg-white translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
+            <span class="absolute inset-0 z-20 flex items-center justify-center text-black opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300">Get Started</span>
           </a>
         {% endif %}
       </div>
 
       {%- comment -%} Pro ── {%- endcomment -%}
-      <div class="bg-foreground text-background p-8 md:p-10 relative">
-        <div class="absolute top-6 right-6 text-[9px] uppercase tracking-widest border border-background/30 px-2.5 py-1 text-background/70">Best value</div>
-        <p class="text-[10px] uppercase tracking-widest text-background/50 mb-4">Layered Pro</p>
-        <div class="mb-6">
-          <span class="font-display text-6xl">£9.99</span>
-          <span class="text-sm text-background/50">/month</span>
+      <div class="group relative bg-white text-black p-10 md:p-12 overflow-hidden reveal" style="transition-delay: 200ms">
+        {%- comment -%} Shimmer effect {%- endcomment -%}
+        <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-black/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none"></div>
+        
+        <div class="absolute top-8 right-8 bg-black text-white text-[8px] uppercase tracking-[0.3em] px-3 py-1.5 font-bold">Recommended</div>
+        
+        <div class="flex justify-between items-start mb-12">
+          <div>
+            <p class="text-[10px] uppercase tracking-[0.2em] text-black/40 mb-4">The Full Experience</p>
+            <h2 class="font-display text-4xl">Layered Pro</h2>
+          </div>
+          <div class="text-right">
+            <span class="font-display text-5xl">£20</span>
+            <span class="text-[10px] uppercase tracking-widest text-black/30 block mt-1">Per Month</span>
+          </div>
         </div>
-        <p class="text-sm text-background/60 mb-8">Everything in Free, plus exclusive perks.</p>
-        <ul class="space-y-3 mb-10">
-          {%- assign pro_features = '20% off every order always,Free shipping on all orders,Priority access to new drops,Unlimited outfit saves,Unlimited AI Stylist,Unlimited Virtual Try-On,Early access to limited pieces,Dedicated style support' | split: ',' -%}
+        
+        <p class="text-sm text-black/60 mb-12 leading-relaxed">Everything you need to build a world-class wardrobe with zero friction.</p>
+        
+        <ul class="space-y-4 mb-16">
+          {%- assign pro_features = '15% off every order always,100 AI Virtual Try-On images,Free shipping on all orders,Priority access to new drops,Unlimited outfit saves,Unlimited AI Stylist,Early access to limited pieces,Dedicated style support' | split: ',' -%}
           {% for f in pro_features %}
-            <li class="flex items-center gap-3 text-sm text-background/80">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7.5" stroke="white" stroke-opacity=".5"/><path d="M5 8l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <li class="flex items-center gap-4 text-sm font-medium">
+              <span class="w-5 h-5 rounded-full bg-black text-white flex items-center justify-center flex-shrink-0">
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
               {{ f }}
             </li>
           {% endfor %}
         </ul>
+
         {% if customer and customer.tags contains 'Pro Member' %}
-          <div class="bg-background/20 text-background px-6 py-3 text-center text-xs uppercase tracking-wider">Active — enjoy your perks ✦</div>
+          <div class="w-full py-4 text-center text-[10px] uppercase tracking-[0.2em] font-bold bg-black/5 text-black">Current Membership</div>
         {% else %}
-          <a href="/products/layered-pro-plan" class="block text-center bg-background text-foreground px-6 py-3 text-xs uppercase tracking-wider font-semibold hover:bg-background/90 transition-colors">
-            Upgrade to Pro
+          <a href="/cart/add?id={{ pro_product.first_available_variant.id }}&quantity=1&checkout=1" class="group/btn relative block w-full py-4 text-center text-[10px] uppercase tracking-[0.2em] font-bold bg-black text-white overflow-hidden transition-transform hover:scale-[1.02] active:scale-[0.98]">
+            <span class="relative z-10">Upgrade Now</span>
           </a>
-          <p class="text-center text-[10px] text-background/40 mt-3">Cancel anytime · No hidden fees</p>
+          <p class="text-center text-[9px] uppercase tracking-widest text-black/40 mt-6 font-semibold">Instant Access · Cancel Anytime</p>
         {% endif %}
       </div>
 
     </div>
 
     {%- comment -%} ── What Pro means concretely ── {%- endcomment -%}
-    <div class="border-t border-foreground/10 pt-16 mb-16">
-      <p class="text-xs tracking-[0.25em] uppercase text-muted-foreground mb-8">Pro in practice</p>
-      <div class="grid md:grid-cols-3 gap-px bg-foreground/10">
-        <div class="bg-background p-6 md:p-8">
-          <p class="font-display text-3xl mb-3">20%</p>
-          <p class="text-xs uppercase tracking-widest text-muted-foreground mb-2">Off every order</p>
-          <p class="text-sm text-muted-foreground">Applied automatically at checkout, every single time. No code needed.</p>
+    <div class="pt-24 border-t border-white/10 mb-24">
+      <p class="text-[10px] tracking-[0.4em] uppercase text-white/40 mb-12 font-semibold">Pro Perks in Detail</p>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white/5 border border-white/5 p-10 hover:bg-white/10 transition-colors reveal" style="transition-delay: 300ms">
+          <p class="font-display text-5xl mb-6 text-transparent bg-clip-text bg-gradient-to-br from-white to-white/20">15%</p>
+          <p class="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-4 font-bold">Off Every Order</p>
+          <p class="text-sm text-white/50 leading-relaxed">Applied automatically at checkout, every single time. No codes, no hassle.</p>
         </div>
-        <div class="bg-background p-6 md:p-8">
-          <p class="font-display text-3xl mb-3">∞</p>
-          <p class="text-xs uppercase tracking-widest text-muted-foreground mb-2">Unlimited saves</p>
-          <p class="text-sm text-muted-foreground">Build and save as many outfits as you want. No caps, no limits.</p>
+        <div class="bg-white/5 border border-white/5 p-10 hover:bg-white/10 transition-colors reveal" style="transition-delay: 400ms">
+          <p class="font-display text-5xl mb-6 text-transparent bg-clip-text bg-gradient-to-br from-white to-white/20">100</p>
+          <p class="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-4 font-bold">AI Generations</p>
+          <p class="text-sm text-white/50 leading-relaxed">Perfectly visualize any piece on yourself with high-fidelity AI virtual try-on.</p>
         </div>
-        <div class="bg-background p-6 md:p-8">
-          <p class="font-display text-3xl mb-3">1st</p>
-          <p class="text-xs uppercase tracking-widest text-muted-foreground mb-2">Early access</p>
-          <p class="text-sm text-muted-foreground">Get notified before anyone else when new layers drop.</p>
+        <div class="bg-white/5 border border-white/5 p-10 hover:bg-white/10 transition-colors reveal" style="transition-delay: 500ms">
+          <p class="font-display text-5xl mb-6 text-transparent bg-clip-text bg-gradient-to-br from-white to-white/20">1st</p>
+          <p class="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-4 font-bold">Priority Access</p>
+          <p class="text-sm text-white/50 leading-relaxed">Get notified 24 hours before anyone else when limited collections drop.</p>
         </div>
       </div>
     </div>
 
     {%- comment -%} ── FAQ ── {%- endcomment -%}
-    <div class="max-w-2xl">
-      <p class="text-xs tracking-[0.25em] uppercase text-muted-foreground mb-8">Questions</p>
-      <div class="divide-y divide-foreground/10">
+    <div class="max-w-2xl reveal" style="transition-delay: 600ms">
+      <p class="text-[10px] tracking-[0.4em] uppercase text-white/40 mb-12 font-semibold">Common Questions</p>
+      <div class="divide-y divide-white/10">
 
         <details class="pr-faq group">
-          <summary>When does the 20% discount apply?</summary>
-          <p>It's applied automatically at checkout on every order while your membership is active. There's no code to remember.</p>
+          <summary class="py-6 text-sm uppercase tracking-wider font-semibold text-white/80 hover:text-white transition-colors">When does the 15% discount apply?</summary>
+          <p class="pb-6 text-sm text-white/40 leading-relaxed">It's applied automatically at checkout on every order while your membership is active. You'll see the savings reflected in your subtotal.</p>
         </details>
 
         <details class="pr-faq group">
-          <summary>Can I cancel anytime?</summary>
-          <p>Yes — cancel from your Shopify account at any time. Your benefits remain active until the end of the billing period.</p>
+          <summary class="py-6 text-sm uppercase tracking-wider font-semibold text-white/80 hover:text-white transition-colors">How do image generations work?</summary>
+          <p class="pb-6 text-sm text-white/40 leading-relaxed">Each time you use the "Virtual Try-On" feature to generate a preview of a product on your photo, it counts as one generation. Pro members get 100 per month.</p>
         </details>
 
         <details class="pr-faq group">
-          <summary>Does it work with sale prices?</summary>
-          <p>The Pro discount applies to standard pricing. Sale items may have different terms noted on the product page.</p>
+          <summary class="py-6 text-sm uppercase tracking-wider font-semibold text-white/80 hover:text-white transition-colors">Can I cancel anytime?</summary>
+          <p class="pb-6 text-sm text-white/40 leading-relaxed">Absolutely. You can manage your subscription from your account dashboard. Your benefits will remain active until the end of your current billing cycle.</p>
         </details>
 
         <details class="pr-faq group">
-          <summary>How do I access Pro features after subscribing?</summary>
-          <p>Your account is upgraded automatically. Sign out and back in if features don't appear immediately.</p>
-        </details>
-
-        <details class="pr-faq group">
-          <summary>Is the Pro Plan a physical product?</summary>
-          <p>No — it's a digital subscription that unlocks perks on your account. Nothing is shipped.</p>
+          <summary class="py-6 text-sm uppercase tracking-wider font-semibold text-white/80 hover:text-white transition-colors">Is there a contract?</summary>
+          <p class="pb-6 text-sm text-white/40 leading-relaxed">No contracts or hidden fees. Layered Pro is a simple monthly subscription that you control.</p>
         </details>
 
       </div>
@@ -170,13 +204,13 @@
   </div>
 </div>
 
+  </div>
+</div>
+
 <style>
   .pr-faq summary {
     cursor: pointer;
     list-style: none;
-    padding: 1rem 0;
-    font-size: .9375rem;
-    font-weight: 500;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -185,18 +219,30 @@
   .pr-faq summary::-webkit-details-marker { display: none; }
   .pr-faq summary::after {
     content: '+';
-    font-size: 1.25rem;
-    font-weight: 300;
-    color: hsl(var(--muted-foreground));
+    font-size: 1.5rem;
+    font-weight: 200;
+    color: rgba(255,255,255,0.3);
     flex-shrink: 0;
+    transition: transform 0.3s ease;
   }
-  .pr-faq[open] summary::after { content: '−'; }
-  .pr-faq p {
-    padding: 0 0 1rem;
-    margin: 0;
-    font-size: .875rem;
-    color: hsl(var(--muted-foreground));
-    line-height: 1.7;
+  .pr-faq[open] summary::after { 
+    content: '−';
+    transform: rotate(180deg);
+  }
+  
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.1; transform: scale(1); }
+    50% { opacity: 0.15; transform: scale(1.1); }
   }
 </style>
 
@@ -205,5 +251,16 @@
   const toggle = document.getElementById('pr-menu-toggle');
   const menu   = document.getElementById('pr-mobile-menu');
   if (toggle && menu) toggle.addEventListener('click', () => menu.classList.toggle('hidden'));
+
+  // Reveal animations on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 })();
 </script>

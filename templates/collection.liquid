@@ -15,11 +15,11 @@
     {{ collection.title | default: 'Shop' }}
   </h1>
 
-  {%- comment -%} ── Curated Outfits section (shown whenever 'outfits' collection has products) ── {%- endcomment -%}
+  {%- comment -%} ── Ready Made Outfits section (shown whenever 'outfits' collection has products) ── {%- endcomment -%}
   {% if outfit_collection and outfit_collection.products.size > 0 %}
     <div class="outfits-section py-8 md:py-10 mb-8 md:mb-10 border-b">
       <div class="flex items-center justify-between mb-4 md:mb-6">
-        <h2 class="text-xl md:text-2xl font-bold">Curated Outfits</h2>
+        <h2 class="text-xl md:text-2xl font-bold">Ready Made Outfits</h2>
         <a href="{{ outfit_collection.url }}" class="text-sm font-medium underline underline-offset-2 hover:opacity-70 transition-opacity">
           View all
         </a>
@@ -92,10 +92,14 @@
   {%- comment -%} ── Product grid ── {%- endcomment -%}
   {% paginate collection.products by 24 %}
 
-    {%- comment -%} Count visible (non-Pro-Plan) products for the empty state {%- endcomment -%}
+    {%- comment -%} Count visible (non-Pro-Plan, non-Outfit) products for the empty state {%- endcomment -%}
     {%- assign visible_count = 0 -%}
     {% for product in collection.products %}
-      {% unless product.tags contains 'Service' or product.handle == 'layered-pro-plan' %}
+      {%- assign is_outfit = false -%}
+      {% for c in product.collections %}
+        {% if c.handle == 'outfits' %}{% assign is_outfit = true %}{% break %}{% endif %}
+      {% endfor %}
+      {% unless product.tags contains 'Service' or product.handle == 'layered-pro-plan' or is_outfit %}
         {%- assign visible_count = visible_count | plus: 1 -%}
       {% endunless %}
     {% endfor %}
@@ -106,7 +110,12 @@
 
       <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
         {% for product in collection.products %}
-          {% unless product.tags contains 'Service' or product.handle == 'layered-pro-plan' %}
+          {%- assign is_outfit = false -%}
+          {% for c in product.collections %}
+            {% if c.handle == 'outfits' %}{% assign is_outfit = true %}{% break %}{% endif %}
+          {% endfor %}
+
+          {% unless product.tags contains 'Service' or product.handle == 'layered-pro-plan' or is_outfit %}
 
             {%- comment -%}
               Determine category using the same regex rules as the React Ba() function:
