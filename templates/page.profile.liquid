@@ -1,151 +1,236 @@
-<div class="cust-page max-w-5xl mx-auto py-8 md:py-12 px-4">
+{% comment %} Profile — uses SPA design tokens from layered-app.css {% endcomment %}
 
-  {%- comment -%} ── Top utility bar ── {%- endcomment -%}
-  <div class="flex items-center justify-between mb-8 md:mb-10">
-    <a href="/" class="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-black transition-colors">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-      Back to Homepage
-    </a>
+{%- comment -%} ── Minimal site nav for native pages ── {%- endcomment -%}
+<header class="fixed top-0 inset-x-0 z-50 border-b border-foreground/10 bg-background/80 backdrop-blur-md">
+  <div class="container max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+    <a href="/" class="font-display text-xl text-foreground">Layered</a>
+    <nav class="hidden md:flex items-center gap-7">
+      <a href="/collections/all" class="text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">Shop</a>
+      <a href="/outfits" class="text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">Outfits</a>
+      <a href="/ai-assistant" class="text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">AI Stylist</a>
+      <a href="/pages/profile" class="text-xs uppercase tracking-wider text-foreground border-b border-foreground pb-0.5">Profile</a>
+      <a href="/pages/pricing" class="text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
+      {% if customer %}
+        <a href="/account" class="text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">Account</a>
+      {% else %}
+        <a href="{{ routes.account_login_url }}" class="text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">Sign in</a>
+      {% endif %}
+    </nav>
+    {%- comment -%} Mobile menu toggle — simple approach {%- endcomment -%}
+    <button id="pf-menu-toggle" class="md:hidden p-2 -mr-2 text-foreground" aria-label="Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+  </div>
+  <div id="pf-mobile-menu" class="md:hidden hidden border-t border-foreground/10 bg-background">
+    <div class="container max-w-7xl mx-auto px-4 py-5 flex flex-col gap-4">
+      <a href="/collections/all" class="text-base font-display text-foreground/70 hover:text-foreground">Shop</a>
+      <a href="/outfits" class="text-base font-display text-foreground/70 hover:text-foreground">Outfits</a>
+      <a href="/ai-assistant" class="text-base font-display text-foreground/70 hover:text-foreground">AI Stylist</a>
+      <a href="/pages/profile" class="text-base font-display text-foreground">Profile</a>
+      <a href="/pages/pricing" class="text-base font-display text-foreground/70 hover:text-foreground">Pricing</a>
+      {% if customer %}
+        <a href="/account" class="text-base font-display text-foreground/70 hover:text-foreground">Account</a>
+      {% else %}
+        <a href="{{ routes.account_login_url }}" class="text-base font-display text-foreground/70 hover:text-foreground">Sign in</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+<div class="min-h-screen bg-background text-foreground pt-14">
+  <div class="container max-w-7xl mx-auto px-4 py-16 md:py-20">
+
     {% if customer %}
-      <a href="{{ routes.account_logout_url }}" class="text-xs text-gray-400 hover:text-black transition-colors">Sign out</a>
+
+      {%- comment -%} ── Page heading ── {%- endcomment -%}
+      <div class="mb-12 md:mb-16">
+        <p class="text-xs tracking-[0.25em] uppercase text-muted-foreground mb-3">My Account</p>
+        <h1 class="font-display text-5xl md:text-7xl leading-tight">{{ customer.first_name }}<span class="italic">'s profile</span></h1>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-8 lg:gap-12">
+
+        {%- comment -%} ── Left column ── {%- endcomment -%}
+        <div class="lg:col-span-2 space-y-8">
+
+          {%- comment -%} Account details card {%- endcomment -%}
+          <div class="border border-foreground/10 p-6 md:p-8">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xs uppercase tracking-widest text-muted-foreground">Account details</h2>
+              <a href="/account" class="text-xs text-muted-foreground hover:text-foreground transition-colors underline">Edit in account</a>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-px bg-foreground/10">
+              <div class="bg-background p-4">
+                <p class="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">First name</p>
+                <p class="text-sm">{{ customer.first_name | default: '—' }}</p>
+              </div>
+              <div class="bg-background p-4">
+                <p class="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Last name</p>
+                <p class="text-sm">{{ customer.last_name | default: '—' }}</p>
+              </div>
+              <div class="bg-background p-4 sm:col-span-2">
+                <p class="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Email</p>
+                <p class="text-sm">{{ customer.email }}</p>
+              </div>
+              <div class="bg-background p-4">
+                <p class="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Member since</p>
+                <p class="text-sm">{{ customer.created_at | date: "%B %Y" }}</p>
+              </div>
+              <div class="bg-background p-4">
+                <p class="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Total orders</p>
+                <p class="text-sm">{{ customer.orders.size }}</p>
+              </div>
+            </div>
+          </div>
+
+          {%- comment -%} Style preferences (localStorage) {%- endcomment -%}
+          <div class="border border-foreground/10 p-6 md:p-8">
+            <h2 class="text-xs uppercase tracking-widest text-muted-foreground mb-6">Style preferences</h2>
+            <p class="text-xs text-muted-foreground mb-5">Select what you typically shop for — used to personalise your experience.</p>
+            <div id="pf-prefs" class="flex flex-wrap gap-2 mb-6">
+              {%- assign categories = 'Tops,Bottoms,Outerwear,Shoes,Accessories,Outfits' | split: ',' -%}
+              {% for cat in categories %}
+                <button
+                  data-cat="{{ cat }}"
+                  class="pf-pref-btn px-4 py-2 text-xs uppercase tracking-wider border border-foreground/20 transition-all hover:border-foreground"
+                >{{ cat }}</button>
+              {% endfor %}
+            </div>
+            <button id="pf-save-prefs" class="px-6 py-2.5 bg-foreground text-background text-xs uppercase tracking-wider hover:bg-foreground/80 transition-colors">
+              Save preferences
+            </button>
+            <p id="pf-prefs-saved" class="text-xs text-muted-foreground mt-3 hidden">Saved.</p>
+          </div>
+
+          {%- comment -%} Saved outfits from outfit builder (localStorage) {%- endcomment -%}
+          <div class="border border-foreground/10 p-6 md:p-8">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xs uppercase tracking-widest text-muted-foreground">Saved outfit builds</h2>
+              <a href="/outfits/build" class="text-xs text-muted-foreground hover:text-foreground transition-colors">Build an outfit →</a>
+            </div>
+            <div id="pf-outfits-list">
+              <p class="text-sm text-muted-foreground">Loading saved outfits…</p>
+            </div>
+          </div>
+
+        </div>
+
+        {%- comment -%} ── Right sidebar ── {%- endcomment -%}
+        <div class="space-y-6">
+
+          {%- comment -%} Identity card {%- endcomment -%}
+          <div class="border border-foreground/10 p-6 text-center">
+            <div class="w-16 h-16 bg-foreground text-background flex items-center justify-center text-2xl font-display mx-auto mb-4">
+              {{ customer.first_name | slice: 0 | upcase }}
+            </div>
+            <p class="font-semibold text-sm">{{ customer.name }}</p>
+            <p class="text-xs text-muted-foreground mt-0.5">{{ customer.email }}</p>
+            {% if customer.tags contains 'Pro Member' %}
+              <div class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-foreground text-background text-[10px] uppercase tracking-wider">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+                Pro Member
+              </div>
+            {% else %}
+              <a href="/pages/pricing" class="mt-3 inline-block text-[10px] uppercase tracking-wider border border-foreground px-4 py-1.5 hover:bg-foreground hover:text-background transition-colors">
+                Upgrade to Pro
+              </a>
+            {% endif %}
+          </div>
+
+          {%- comment -%} Quick links {%- endcomment -%}
+          <div class="border border-foreground/10 p-6">
+            <h3 class="text-[10px] uppercase tracking-widest text-muted-foreground mb-4">Quick links</h3>
+            <ul class="space-y-3 text-sm">
+              <li><a href="/account" class="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"><span class="w-px h-3 bg-foreground/30"></span>Order history</a></li>
+              <li><a href="{{ routes.account_addresses_url }}" class="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"><span class="w-px h-3 bg-foreground/30"></span>Saved addresses</a></li>
+              <li><a href="/pages/pricing" class="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"><span class="w-px h-3 bg-foreground/30"></span>Pricing &amp; Pro</a></li>
+              <li><a href="/collections/all" class="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"><span class="w-px h-3 bg-foreground/30"></span>Continue shopping</a></li>
+              <li><a href="{{ routes.account_logout_url }}" class="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"><span class="w-px h-3 bg-foreground/30"></span>Sign out</a></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+    {% else %}
+
+      <div class="max-w-md mx-auto text-center py-24 border border-dashed border-foreground/20">
+        <p class="font-display text-3xl mb-3">Sign in first</p>
+        <p class="text-sm text-muted-foreground mb-8">Your profile is only visible when you're logged in.</p>
+        <a href="{{ routes.account_login_url }}?return_to=/pages/profile" class="inline-block bg-foreground text-background text-xs uppercase tracking-widest px-8 py-3 hover:bg-foreground/80 transition-colors">
+          Sign in
+        </a>
+      </div>
+
     {% endif %}
+
   </div>
-
-  {%- comment -%} ── Nav tabs ── {%- endcomment -%}
-  <div class="flex gap-1 border-b mb-8 md:mb-10 overflow-x-auto">
-    <a href="/account" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition-colors whitespace-nowrap">Orders</a>
-    <a href="{{ routes.account_addresses_url }}" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition-colors whitespace-nowrap">Addresses</a>
-    <span class="px-4 py-2 text-sm font-semibold border-b-2 border-black -mb-px whitespace-nowrap">Profile</span>
-    <a href="/pages/pricing" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition-colors whitespace-nowrap">Pricing</a>
-  </div>
-
-  {% if customer %}
-
-    <div class="grid md:grid-cols-3 gap-6">
-
-      {%- comment -%} ── Profile card ── {%- endcomment -%}
-      <div class="md:col-span-2 space-y-6">
-
-        <div class="border border-gray-200 rounded-xl p-6 bg-white">
-          <h2 class="text-base font-semibold mb-5">Personal details</h2>
-
-          <div class="grid sm:grid-cols-2 gap-4">
-            <div class="cust-field">
-              <label>First name</label>
-              <p>{{ customer.first_name | default: '—' }}</p>
-            </div>
-            <div class="cust-field">
-              <label>Last name</label>
-              <p>{{ customer.last_name | default: '—' }}</p>
-            </div>
-            <div class="cust-field sm:col-span-2">
-              <label>Email address</label>
-              <p>{{ customer.email }}</p>
-            </div>
-            <div class="cust-field">
-              <label>Phone</label>
-              <p>{{ customer.phone | default: '—' }}</p>
-            </div>
-            <div class="cust-field">
-              <label>Member since</label>
-              <p>{{ customer.created_at | date: "%B %Y" }}</p>
-            </div>
-          </div>
-
-          <p class="mt-6 text-xs text-gray-400">
-            To update your name, email, or password, use the
-            <a href="{{ routes.account_url }}" class="underline hover:text-black">account settings</a>
-            page.
-          </p>
-        </div>
-
-        {%- comment -%} Default address ── {%- endcomment -%}
-        {% if customer.default_address %}
-          <div class="border border-gray-200 rounded-xl p-6 bg-white">
-            <div class="flex items-center justify-between mb-5">
-              <h2 class="text-base font-semibold">Default address</h2>
-              <a href="{{ routes.account_addresses_url }}" class="text-xs text-gray-500 hover:text-black underline transition-colors">Manage</a>
-            </div>
-            <address class="not-italic text-sm text-gray-700 leading-relaxed">
-              {{ customer.default_address.name }}<br>
-              {% if customer.default_address.company != blank %}{{ customer.default_address.company }}<br>{% endif %}
-              {{ customer.default_address.address1 }}<br>
-              {% if customer.default_address.address2 != blank %}{{ customer.default_address.address2 }}<br>{% endif %}
-              {{ customer.default_address.city }}, {{ customer.default_address.province_code }} {{ customer.default_address.zip }}<br>
-              {{ customer.default_address.country }}
-            </address>
-          </div>
-        {% endif %}
-
-      </div>
-
-      {%- comment -%} ── Sidebar ── {%- endcomment -%}
-      <div class="space-y-6">
-
-        <div class="border border-gray-200 rounded-xl p-6 bg-white text-center">
-          <div class="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center text-2xl font-bold mx-auto mb-4">
-            {{ customer.first_name | slice: 0 | upcase }}
-          </div>
-          <p class="font-semibold text-sm">{{ customer.name }}</p>
-          <p class="text-xs text-gray-500 mt-0.5">{{ customer.email }}</p>
-          {% if customer.tags contains 'Pro Member' %}
-            <span class="inline-flex items-center gap-1 mt-3 px-3 py-1 rounded-full text-xs font-bold bg-black text-white">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z"/></svg>
-              Pro Member
-            </span>
-          {% else %}
-            <a href="/pages/pricing" class="inline-block mt-3 text-xs font-semibold border border-black rounded-full px-4 py-1.5 hover:bg-black hover:text-white transition-colors">
-              Upgrade to Pro
-            </a>
-          {% endif %}
-        </div>
-
-        <div class="border border-gray-200 rounded-xl p-6 bg-white">
-          <h3 class="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-4">Quick links</h3>
-          <ul class="space-y-2 text-sm">
-            <li><a href="/account" class="text-gray-700 hover:text-black transition-colors">Order history</a></li>
-            <li><a href="{{ routes.account_addresses_url }}" class="text-gray-700 hover:text-black transition-colors">Saved addresses</a></li>
-            <li><a href="/pages/pricing" class="text-gray-700 hover:text-black transition-colors">Pricing &amp; Pro</a></li>
-            <li><a href="/collections/all" class="text-gray-700 hover:text-black transition-colors">Continue shopping</a></li>
-          </ul>
-        </div>
-
-      </div>
-    </div>
-
-  {% else %}
-
-    <div class="text-center py-20 border border-dashed border-gray-200 rounded-xl">
-      <p class="text-gray-600 font-medium mb-2">You're not signed in</p>
-      <p class="text-sm text-gray-500 mb-6">Sign in to view your profile.</p>
-      <a href="{{ routes.account_login_url }}" class="inline-block bg-black text-white font-bold px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors text-sm">
-        Sign in
-      </a>
-    </div>
-
-  {% endif %}
-
 </div>
 
-<style>
-  .cust-page { font-family: 'Inter', system-ui, sans-serif; }
+<script>
+(function() {
+  // Mobile menu toggle
+  const toggle = document.getElementById('pf-menu-toggle');
+  const menu   = document.getElementById('pf-mobile-menu');
+  if (toggle && menu) toggle.addEventListener('click', () => menu.classList.toggle('hidden'));
 
-  .cust-field label {
-    display: block;
-    font-size: .6875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: #9ca3af;
-    margin-bottom: .25rem;
+  // ── Style preferences ──────────────────────────────────────────────────
+  const PREFS_KEY = 'layered_style_prefs';
+  const saved = JSON.parse(localStorage.getItem(PREFS_KEY) || '[]');
+
+  document.querySelectorAll('.pf-pref-btn').forEach(btn => {
+    if (saved.includes(btn.dataset.cat)) {
+      btn.classList.add('bg-foreground', 'text-background', 'border-foreground');
+    }
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('bg-foreground');
+      btn.classList.toggle('text-background');
+      btn.classList.toggle('border-foreground');
+    });
+  });
+
+  document.getElementById('pf-save-prefs')?.addEventListener('click', () => {
+    const active = [...document.querySelectorAll('.pf-pref-btn')]
+      .filter(b => b.classList.contains('bg-foreground'))
+      .map(b => b.dataset.cat);
+    localStorage.setItem(PREFS_KEY, JSON.stringify(active));
+    const msg = document.getElementById('pf-prefs-saved');
+    if (msg) { msg.classList.remove('hidden'); setTimeout(() => msg.classList.add('hidden'), 2000); }
+  });
+
+  // ── Saved outfit builds ───────────────────────────────────────────────
+  const container = document.getElementById('pf-outfits-list');
+  if (!container) return;
+
+  try {
+    const raw = localStorage.getItem('layered-outfit');
+    const outfitState = raw ? JSON.parse(raw) : null;
+    const slots = outfitState?.state?.slots || {};
+    const filled = Object.entries(slots).filter(([, v]) => v && v.product);
+
+    if (filled.length === 0) {
+      container.innerHTML = '<p class="text-sm text-muted-foreground">No saved outfit yet. <a href="/outfits/build" class="underline hover:text-foreground">Build your first look →</a></p>';
+      return;
+    }
+
+    let html = '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">';
+    filled.forEach(([slot, v]) => {
+      const img   = v.product?.node?.images?.edges?.[0]?.node?.url || '';
+      const title = v.product?.node?.title || slot;
+      const label = slot.charAt(0).toUpperCase() + slot.slice(1);
+      html += `<div class="text-center">
+        <div class="aspect-[3/4] bg-muted mb-2 overflow-hidden">
+          ${img ? `<img src="${img}" alt="${title}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-muted-foreground text-xs">' + label + '</div>'}
+        </div>
+        <p class="text-[10px] uppercase tracking-widest text-muted-foreground">${label}</p>
+        <p class="text-xs truncate">${title}</p>
+      </div>`;
+    });
+    html += '</div>';
+    html += '<a href="/outfits/build" class="inline-block mt-5 text-xs uppercase tracking-wider border border-foreground/20 px-5 py-2 hover:border-foreground transition-colors">Edit outfit →</a>';
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<p class="text-sm text-muted-foreground">Could not load saved outfits.</p>';
   }
-  .cust-field p {
-    font-size: .9375rem;
-    color: #111;
-    margin: 0;
-    padding: .625rem .875rem;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-  }
-</style>
+})();
+</script>
