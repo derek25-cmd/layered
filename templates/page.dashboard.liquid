@@ -1,0 +1,45 @@
+{%- comment -%}
+  Custom Protected Dashboard
+  Route: /pages/dashboard
+{%- endcomment -%}
+
+{% if customer %}
+  <div class="dashboard-page container mx-auto py-12 px-4 max-w-6xl">
+    <header class="mb-10">
+      <h1 class="text-3xl font-bold">Welcome, {{ customer.first_name | default: 'Member' }}</h1>
+      <p class="text-gray-500">Access your exclusive Pro tools and order history below.</p>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Custom Dashboard Content Cards -->
+      <div class="bg-white border p-6 rounded-xl shadow-sm">
+        <h3 class="font-bold mb-2">My Orders</h3>
+        <p class="text-sm text-gray-600 mb-4">View and track your recent purchases.</p>
+        <a href="/account" class="text-sm font-bold underline">View All Orders</a>
+      </div>
+      
+      <div class="bg-white border p-6 rounded-xl shadow-sm">
+        <h3 class="font-bold mb-2">Profile Settings</h3>
+        <p class="text-sm text-gray-600 mb-4">Update your shipping and contact info.</p>
+        <a href="/account/addresses" class="text-sm font-bold underline">Manage Addresses</a>
+      </div>
+
+      <div class="bg-white border p-6 rounded-xl shadow-sm">
+        <h3 class="font-bold mb-2">Layered Pro</h3>
+        <p class="text-sm text-gray-600 mb-4">Your subscription is active.</p>
+        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">Pro Member</span>
+      </div>
+    </div>
+  </div>
+{% else %}
+  {%- comment -%} Protection Logic for Non-Logged In Users {%- endcomment -%}
+  <script>
+    window.location.replace('/account/login');
+  </script>
+  <div class="flex items-center justify-center min-h-[60vh]">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto mb-4"></div>
+      <p class="text-gray-500">Verifying session...</p>
+    </div>
+  </div>
+{% endif %}

@@ -22,9 +22,57 @@
   </div>
 
   {%- comment -%} ── Account nav tabs ── {%- endcomment -%}
-  <div class="flex gap-1 border-b mb-8">
-    <span class="px-4 py-2 text-sm font-semibold border-b-2 border-black -mb-px">Orders</span>
+  <div class="flex gap-1 border-b mb-8 overflow-x-auto whitespace-nowrap">
+    <a href="/account" class="px-4 py-2 text-sm font-semibold {% if request.path == '/account' %}border-b-2 border-black -mb-px text-black{% else %}text-gray-500 hover:text-black{% endif %} transition-colors">Orders</a>
     <a href="{{ routes.account_addresses_url }}" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition-colors">Addresses</a>
+    <a href="#preferences" class="px-4 py-2 text-sm text-gray-500 hover:text-black transition-colors">Preferences & Pro</a>
+  </div>
+
+  {%- comment -%} ── Layered Pro & Preferences Section ── {%- endcomment -%}
+  <div id="preferences" class="mb-12">
+    <div class="bg-gradient-to-br from-gray-900 to-black text-white rounded-2xl p-6 md:p-8 shadow-elegant relative overflow-hidden">
+      <!-- Decorative Element -->
+      <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+      
+      <div class="relative z-10">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z"></path></svg>
+          </div>
+          <h2 class="text-xl md:text-2xl font-bold font-display">Layered Pro Membership</h2>
+        </div>
+
+        {% if customer.tags contains 'Pro Member' %}
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <p class="text-white/80 text-sm mb-1">Status</p>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-500 text-white">Active Member</span>
+              <p class="mt-4 text-sm leading-relaxed text-white/70 max-w-md">
+                You are currently enjoying 20% off all orders and priority access to new collection layers.
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+              <a href="{{ routes.all_products_collection_url }}" class="bg-white text-black text-sm font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">
+                Shop with 20% Off
+              </a>
+            </div>
+          </div>
+        {% else %}
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <p class="text-white/80 text-sm mb-1">Status</p>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-white/20 text-white/60 italic">No Active Subscription</span>
+              <p class="mt-4 text-sm leading-relaxed text-white/70 max-w-md">
+                Unlock 20% off every order, free shipping, and exclusive early access to outfits.
+              </p>
+            </div>
+            <a href="/products/layered-pro-plan" class="bg-white text-black text-sm font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors text-center">
+              Upgrade to Pro
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
   </div>
 
   {%- comment -%} ── Order list ── {%- endcomment -%}
