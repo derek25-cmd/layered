@@ -1,0 +1,42 @@
+{% schema %}
+{
+  "name": "Hero",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Elevate Your Layering"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Background Image"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero"
+    }
+  ]
+}
+{% endschema %}
+
+<section class="relative h-[70vh] flex items-center justify-center bg-gray-100 overflow-hidden">
+  <div class="container mx-auto px-4 text-center z-10">
+    <h1 class="text-5xl md:text-7xl font-display font-bold mb-6">
+      {{ section.settings.heading }}
+    </h1>
+    
+    <!-- CTA: "Shop by Layer" linking to the native Shop All collection -->
+    <a href="{{ routes.all_products_collection_url }}" class="inline-block bg-black text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-800 transition-all hover:scale-105 shadow-elegant">
+      Shop by Layer
+    </a>
+  </div>
+  
+  {% if section.settings.image %}
+    <img src="{{ section.settings.image | image_url: width: 2000 }}" class="absolute inset-0 w-full h-full object-cover opacity-60">
+  {% else %}
+    <div class="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-400 opacity-50"></div>
+  {% endif %}
+</section>

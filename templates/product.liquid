@@ -11,9 +11,12 @@
         <img src="{{ product.featured_image | image_url: width: 1000 }}" alt="{{ product.title }}" class="w-full h-full object-cover">
       </div>
       <div class="thumbnails flex gap-4 mt-4 overflow-x-auto">
-        {% for image in product.images offset: 1 %}
-          <div class="w-24 h-32 flex-shrink-0 bg-gray-100 rounded cursor-pointer border-2 border-transparent hover:border-black transition-colors">
-            <img src="{{ image | image_url: width: 200 }}" alt="{{ product.title }}" class="w-full h-full object-cover rounded">
+        {% for image in product.images %}
+          <div 
+            class="thumbnail-item w-24 h-32 flex-shrink-0 bg-gray-100 rounded cursor-pointer border-2 border-transparent hover:border-black transition-colors overflow-hidden"
+            onclick="syncThumbnailToVariant('{{ image | image_url: width: 1000 }}')"
+          >
+            <img src="{{ image | image_url: width: 200 }}" alt="{{ product.title }}" class="w-full h-full object-cover">
           </div>
         {% endfor %}
       </div>
@@ -28,9 +31,44 @@
         {{ product.description }}
       </div>
 
-      <!-- Add to Cart Form -->
-      {% form 'product', product %}
-        <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+      <!-- Add to Cart Form with Dropdown Selectors (Feature 3) -->
+      {% form 'product', product, class: 'product-form mt-4' %}
+        <div class="variant-selectors space-y-4 mb-6">
+          {% if product.variants.size > 1 %}
+            {% for option in product.options_with_values %}
+              <div class="selector-wrapper">
+                <label class="block text-sm font-bold text-gray-700 mb-2" for="Option{{ forloop.index }}">
+                  {{ option.name }}
+                </label>
+                <select 
+                  id="Option{{ forloop.index }}" 
+                  class="variant-select w-full border-2 border-gray-200 rounded-lg p-3 focus:border-black outline-none transition-colors"
+                  onchange="updateVariant()"
+                >
+                  {% for value in option.values %}
+                    <option value="{{ value | escape }}" {% if option.selected_value == value %}selected="selected"{% endif %}>
+                      {{ value }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+
+        <!-- Hidden master selector for Shopify to process the form -->
+        <select name="id" id="variant-id" class="hidden">
+          {% for variant in product.variants %}
+            <option value="{{ variant.id }}" 
+              data-price="{{ variant.price | money }}"
+              data-image="{{ variant.featured_image | image_url: width: 1000 }}"
+              {% if variant == product.selected_or_first_available_variant %}selected="selected"{% endif %}
+            >
+              {{ variant.title }}
+            </option>
+          {% endfor %}
+        </select>
+
         <button type="submit" class="w-full bg-black text-white font-bold py-4 rounded-lg hover:bg-gray-800 transition-colors mb-4 shadow-elegant">
           Add to Cart
         </button>
@@ -72,64 +110,118 @@
 </div>
 
 <script>
+// Master Product Data for JS Sync
+const productVariants = [
+  {% for variant in product.variants %}
+    {
+      id: {{ variant.id }},
+      title: {{ variant.title | json }},
+      price: {{ variant.price | money | json }},
+      image: {{ variant.featured_image | image_url: width: 1000 | json }},
+      options: [
+        {% for option in variant.options %}
+          {{ option | json }}{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      ]
+    }{% unless forloop.last %},{% endunless %}
+  {% endfor %}
+];
+
+function updateVariant() {
+  const selects = document.querySelectorAll('.variant-select');
+  const selectedOptions = Array.from(selects).map(select => select.value);
+  
+  // Find the variant that matches all selected options
+  const matchedVariant = productVariants.find(variant => {
+    return variant.options.every((option, index) => option === selectedOptions[index]);
+  });
+
+  if (matchedVariant) {
+    // 1. Update Hidden ID
+    document.getElementById('variant-id').value = matchedVariant.id;
+    
+    // 2. Update Price
+    const priceDisplay = document.querySelector('.product-details p.text-2xl');
+    if (priceDisplay) priceDisplay.innerText = matchedVariant.price;
+    
+    // 3. Update Main Image
+    if (matchedVariant.image) {
+      document.querySelector('.main-image img').src = matchedVariant.image;
+    }
+    
+    // 4. Update URL without refresh
+    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?variant=' + matchedVariant.id;
+    window.history.replaceState({path: newUrl}, '', newUrl);
+  }
+}
+
+function syncThumbnailToVariant(imgUrl) {
+  // 1. Update Main Image View
+  document.querySelector('.main-image img').src = imgUrl;
+
+  // 2. Find if any variant is associated with this image
+  const matchedVariant = productVariants.find(variant => variant.image === imgUrl);
+  
+  if (matchedVariant) {
+    // Update the dropdowns to match this variant's options
+    const selects = document.querySelectorAll('.variant-select');
+    matchedVariant.options.forEach((option, index) => {
+      if (selects[index]) {
+        selects[index].value = option;
+      }
+    });
+    // Trigger the update logic (URL, Price, etc.)
+    updateVariant();
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  // Virtual Try-On Logic (Existing)
   const fileInput = document.getElementById('vto-user-image');
   const generateBtn = document.getElementById('vto-generate-btn');
   const loadingState = document.getElementById('vto-loading');
   const resultContainer = document.getElementById('vto-result-container');
   const resultImage = document.getElementById('vto-result-image');
   
-  // Current Shopify Product Image URL
   const productImageUrl = "{{ product.featured_image | image_url: width: 1000 }}";
-  // The Vercel / Supabase Edge Function Endpoint from the previous React app
   const apiEndpoint = "https://your-project.supabase.co/functions/v1/virtual-try-on";
 
-  generateBtn.addEventListener('click', async () => {
-    if (!fileInput.files || fileInput.files.length === 0) {
-      alert("Please upload your photo first.");
-      return;
-    }
-
-    const userFile = fileInput.files[0];
-    
-    // Show loading state
-    generateBtn.disabled = true;
-    loadingState.classList.remove('hidden');
-    resultContainer.classList.add('hidden');
-
-    try {
-      const formData = new FormData();
-      formData.append('user_image', userFile);
-      formData.append('product_image_url', productImageUrl);
-      
-      // Send request to Edge Function
-      const response = await fetch(apiEndpoint, {
-        method: 'POST',
-        // Optional Authorization header if required by Edge Function
-        // headers: { 'Authorization': 'Bearer YOUR_API_KEY' },
-        body: formData
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate image');
+  if (generateBtn) {
+    generateBtn.addEventListener('click', async () => {
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert("Please upload your photo first.");
+        return;
       }
 
-      const data = await response.json();
-      
-      // Assuming response contains { image_url: '...' }
-      resultImage.src = data.image_url;
-      
-      // Hide loading, show result
-      loadingState.classList.add('hidden');
-      resultContainer.classList.remove('hidden');
+      const userFile = fileInput.files[0];
+      generateBtn.disabled = true;
+      loadingState.classList.remove('hidden');
+      resultContainer.classList.add('hidden');
 
-    } catch (error) {
-      console.error("VTO Error:", error);
-      alert("An error occurred during generation. Please try again.");
-      loadingState.classList.add('hidden');
-    } finally {
-      generateBtn.disabled = false;
-    }
-  });
+      try {
+        const formData = new FormData();
+        formData.append('user_image', userFile);
+        formData.append('product_image_url', document.querySelector('.main-image img').src);
+        
+        const response = await fetch(apiEndpoint, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) throw new Error('Failed to generate image');
+        const data = await response.json();
+        resultImage.src = data.image_url;
+        loadingState.classList.add('hidden');
+        resultContainer.classList.remove('hidden');
+
+      } catch (error) {
+        console.error("VTO Error:", error);
+        alert("An error occurred during generation. Please try again.");
+        loadingState.classList.add('hidden');
+      } finally {
+        generateBtn.disabled = false;
+      }
+    });
+  }
 });
 </script>
