@@ -205,28 +205,67 @@
 </div>
 
 <style>
-  /* Fallback for arbitrary Tailwind classes not in layered-app.css */
+  /* ── Arbitrary Tailwind class fallbacks (not compiled into layered-app.css) ── */
   .text-\[10px\] { font-size: 10px; }
-  .text-\[8px\] { font-size: 8px; }
-  .text-\[9px\] { font-size: 9px; }
-  .tracking-\[0.4em\] { letter-spacing: 0.4em; }
-  .tracking-\[0.2em\] { letter-spacing: 0.2em; }
-  .leading-\[0.9\] { line-height: 0.9; }
-  
-  .bg-white\/5 { background-color: rgba(255, 255, 255, 0.05); }
-  .bg-white\/10 { background-color: rgba(255, 255, 255, 0.1); }
-  .bg-white\/20 { background-color: rgba(255, 255, 255, 0.2); }
-  .bg-black\/5 { background-color: rgba(0, 0, 0, 0.05); }
-  .bg-black\/60 { background-color: rgba(0, 0, 0, 0.6); }
-  .bg-black\/95 { background-color: rgba(0, 0, 0, 0.95); }
-  
-  .border-white\/5 { border-color: rgba(255, 255, 255, 0.05); }
-  .border-white\/10 { border-color: rgba(255, 255, 255, 0.1); }
-  .border-white\/20 { border-color: rgba(255, 255, 255, 0.2); }
-  
-  .backdrop-blur-xl { backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
-  .backdrop-blur-2xl { backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); }
+  .text-\[9px\]  { font-size: 9px; }
+  .text-\[8px\]  { font-size: 8px; }
+  .tracking-\[0\.2em\] { letter-spacing: .2em; }
+  .tracking-\[0\.3em\] { letter-spacing: .3em; }
+  .tracking-\[0\.4em\] { letter-spacing: .4em; }
+  .leading-\[0\.9\]    { line-height: .9; }
+  .blur-\[120px\]      { filter: blur(120px); }
+  .duration-1000       { transition-duration: 1000ms; }
 
+  /* Opacity-modified backgrounds */
+  .bg-white\/5   { background-color: rgb(255 255 255/.05); }
+  .bg-white\/10  { background-color: rgb(255 255 255/.10); }
+  .bg-white\/20  { background-color: rgb(255 255 255/.20); }
+  .bg-black\/5   { background-color: rgb(0 0 0/.05); }
+  .bg-black\/60  { background-color: rgb(0 0 0/.60); }
+  .bg-black\/95  { background-color: rgb(0 0 0/.95); }
+  .bg-purple-500\/10 { background-color: rgb(168 85 247/.10); }
+  .bg-blue-500\/10   { background-color: rgb(59 130 246/.10); }
+
+  /* Opacity-modified borders */
+  .border-white\/5  { border-color: rgb(255 255 255/.05); }
+  .border-white\/10 { border-color: rgb(255 255 255/.10); }
+  .border-white\/20 { border-color: rgb(255 255 255/.20); }
+  .hover\:border-white\/20:hover { border-color: rgb(255 255 255/.20); }
+  .group:hover .group-hover\:border-white\/40 { border-color: rgb(255 255 255/.40); }
+
+  /* Opacity-modified text */
+  .text-white\/20 { color: rgb(255 255 255/.20); }
+  .text-white\/30 { color: rgb(255 255 255/.30); }
+  .text-white\/40 { color: rgb(255 255 255/.40); }
+  .text-white\/50 { color: rgb(255 255 255/.50); }
+  .text-white\/60 { color: rgb(255 255 255/.60); }
+  .text-white\/70 { color: rgb(255 255 255/.70); }
+  .text-white\/80 { color: rgb(255 255 255/.80); }
+  .text-black\/30 { color: rgb(0 0 0/.30); }
+  .text-black\/40 { color: rgb(0 0 0/.40); }
+  .text-black\/60 { color: rgb(0 0 0/.60); }
+  .decoration-white\/10 { text-decoration-color: rgb(255 255 255/.10); }
+
+  /* Gradient colour stops */
+  .to-white\/20 { --tw-gradient-to: rgb(255 255 255/.20); }
+  .to-white\/30 { --tw-gradient-to: rgb(255 255 255/.30); }
+  .from-purple-500 { --tw-gradient-from: #a855f7; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(168 85 247/0)); }
+  .to-blue-500     { --tw-gradient-to: #3b82f6; }
+
+  /* Backdrop blur */
+  .backdrop-blur-sm  { -webkit-backdrop-filter: blur(4px);  backdrop-filter: blur(4px); }
+  .backdrop-blur-xl  { -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); }
+  .backdrop-blur-2xl { -webkit-backdrop-filter: blur(40px); backdrop-filter: blur(40px); }
+
+  /* Scale hover/active */
+  .hover\:scale-\[1\.02\]:hover   { transform: scale(1.02); }
+  .active\:scale-\[0\.98\]:active { transform: scale(.98); }
+
+  /* Named-group (group/btn) hover variants for animated Get Started button */
+  .group\/btn:hover .group-hover\/btn\:translate-y-0 { transform: translateY(0); }
+  .group\/btn:hover .group-hover\/btn\:opacity-100   { opacity: 1; }
+
+  /* ── FAQ accordion ─────────────────────────────────────────────────────── */
   .pr-faq summary {
     cursor: pointer;
     list-style: none;
