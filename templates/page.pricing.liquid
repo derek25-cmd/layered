@@ -140,9 +140,21 @@
           {% if customer and customer.tags contains 'Pro Member' %}
             <div class="lp-plan-active lp-plan-active--pro">Current Membership</div>
           {% else %}
-            <a href="/cart/{{ pro_product.first_available_variant.id }}:1/checkout" class="lp-btn-primary-inv w-full block text-center">
-              Upgrade Now
-            </a>
+            {%- comment -%}
+              We use a button + JS to call Shopify's Storefront API cartCreate directly,
+              matching the headless cartStore.ts flow, so we get a proper checkoutUrl
+              (with ?channel=online_store) rather than the legacy /cart/ route.
+              The variant ID is passed via data-variant-id rendered server-side by Liquid.
+            {%- endcomment -%}
+            <button
+              id="pr-upgrade-btn"
+              data-variant-id="{{ pro_product.first_available_variant.id }}"
+              class="lp-btn-primary-inv w-full block text-center"
+              aria-label="Upgrade to Layered Pro"
+            >
+              <span id="pr-upgrade-label">Upgrade Now</span>
+              <span id="pr-upgrade-spinner" class="lp-spinner hidden" aria-hidden="true"></span>
+            </button>
             <p class="lp-instant-note">Instant Access · Cancel Anytime</p>
           {% endif %}
         </div>
@@ -706,23 +718,136 @@
   /* ── Legacy FAQ (kept for Shopify Liquid class) ── */
   .pr-faq summary { cursor: pointer; list-style: none; }
   .pr-faq summary::-webkit-details-marker { display: none; }
+
+  /* ── Upgrade button loading state ─────────────────────────────────────── */
+  #pr-upgrade-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .lp-spinner {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border: 1.8px solid rgba(14, 14, 14, 0.2);
+    border-top-color: var(--black);
+    border-radius: 50%;
+    animation: lp-spin 0.65s linear infinite;
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+
+  @keyframes lp-spin { to { transform: rotate(360deg); } }
 </style>
 
 <script>
 (function() {
+  /* ── Mobile menu ─────────────────────────────────────────────────────── */
   const toggle = document.getElementById('pr-menu-toggle');
   const menu   = document.getElementById('pr-mobile-menu');
   if (toggle && menu) toggle.addEventListener('click', () => menu.classList.toggle('hidden'));
 
-  // Reveal animations on scroll
+  /* ── Scroll reveal ───────────────────────────────────────────────────── */
   const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('active');
+    entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  /* ── Pro upgrade → Shopify native checkout ───────────────────────────
+   *
+   *  Mirrors cartStore.ts exactly:
+   *   1. Call Storefront API cartCreate with the Pro variant (qty 1)
+   *   2. Append ?channel=online_store  (matches formatCheckoutUrl helper)
+   *   3. Hard-navigate to the returned checkoutUrl
+   *
+   *  The Storefront domain + token are read from window.__layered_shopify,
+   *  the same config object that lib/shopify.ts consumes in the React SPA.
+   *  If that object is absent we fall back to the legacy /cart/ route so
+   *  the button is never left completely broken.
+   *
+   *  Product:  layered-pro-plan  (type: Service)
+   *  Variant:  server-rendered by Liquid into data-variant-id
+   * ────────────────────────────────────────────────────────────────────── */
+
+  const CART_CREATE_MUTATION = `
+    mutation cartCreate($input: CartInput!) {
+      cartCreate(input: $input) {
+        cart { id checkoutUrl }
+        userErrors { field message }
+      }
+    }
+  `;
+
+  function formatCheckoutUrl(u) {
+    try {
+      const url = new URL(u);
+      url.searchParams.set('channel', 'online_store');
+      return url.toString();
+    } catch { return u; }
+  }
+
+  async function storefrontRequest(query, variables) {
+    /* Read config injected by the headless theme — same source as lib/shopify.ts */
+    const cfg     = window.__layered_shopify || {};
+    const domain  = cfg.domain  || (window.Shopify && window.Shopify.shop) || location.hostname;
+    const token   = cfg.storefrontAccessToken || cfg.token || '';
+    const version = cfg.apiVersion || '2024-07';
+
+    const res = await fetch(`https://${domain}/api/${version}/graphql.json`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': token,
+      },
+      body: JSON.stringify({ query, variables }),
+    });
+    if (!res.ok) throw new Error('Storefront API ' + res.status);
+    return res.json();
+  }
+
+  async function createProCheckout(variantId) {
+    /* Liquid renders a numeric ID; Storefront API needs the GID format */
+    const gid = variantId.startsWith('gid://')
+      ? variantId
+      : 'gid://shopify/ProductVariant/' + variantId;
+
+    const data = await storefrontRequest(CART_CREATE_MUTATION, {
+      input: { lines: [{ quantity: 1, merchandiseId: gid }] }
+    });
+
+    const errs = (data && data.data && data.data.cartCreate && data.data.cartCreate.userErrors) || [];
+    if (errs.length) { console.error('[Layered] cartCreate errors:', errs); return null; }
+
+    const checkoutUrl = data && data.data && data.data.cartCreate && data.data.cartCreate.cart && data.data.cartCreate.cart.checkoutUrl;
+    return checkoutUrl ? formatCheckoutUrl(checkoutUrl) : null;
+  }
+
+  const upgradeBtn = document.getElementById('pr-upgrade-btn');
+  if (upgradeBtn) {
+    upgradeBtn.addEventListener('click', async function() {
+      const variantId = upgradeBtn.dataset.variantId;
+
+      /* Safety: no variant means the product is unavailable server-side */
+      if (!variantId) { window.location.href = '/collections/all'; return; }
+
+      /* Show loading state */
+      var label   = document.getElementById('pr-upgrade-label');
+      var spinner = document.getElementById('pr-upgrade-spinner');
+      upgradeBtn.disabled = true;
+      if (label)   label.textContent = 'Preparing checkout…';
+      if (spinner) spinner.classList.remove('hidden');
+
+      try {
+        var checkoutUrl = await createProCheckout(variantId);
+        /* Navigate to native Shopify checkout */
+        window.location.href = checkoutUrl || ('/cart/' + variantId + ':1/checkout');
+      } catch (err) {
+        console.error('[Layered] Checkout creation failed:', err);
+        /* Graceful fallback — legacy route still completes the purchase */
+        window.location.href = '/cart/' + variantId + ':1/checkout';
       }
     });
-  }, { threshold: 0.1 });
-
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  }
 })();
 </script>
