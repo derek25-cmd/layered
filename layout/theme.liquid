@@ -69,21 +69,22 @@
   </head>
 
   <body>
-    <script>
-      window.__SHOPIFY_CONTEXT__ = {
-        shopDomain:    {{ shop.permanent_domain | json }},
-        shopName:      {{ shop.name | json }},
-        currency:      {{ shop.currency | json }},
-        locale:        {{ request.locale.iso_code | json }},
-        customerId:    {{ customer.id | json | default: 'null' }},
-        customerEmail: {{ customer.email | json | default: 'null' }},
-        customerName:  {{ customer.name | json | default: 'null' }},
-        cartToken:     {{ cart.token | json | default: 'null' }},
-        cartItemCount: {{ cart.item_count | json }},
-        isLoggedIn:    {% if customer %}true{% else %}false{% endif %},
-        template:      {{ template.name | json }}
-      };
+    <script type="application/json" id="shopify-context-data">
+      {
+        "shopDomain":    {{ shop.permanent_domain | json }},
+        "shopName":      {{ shop.name | json }},
+        "currency":      {{ shop.currency | json }},
+        "locale":        {{ request.locale.iso_code | json }},
+        "customerId":    {{ customer.id | json | default: "null" }},
+        "customerEmail": {{ customer.email | json | default: "null" }},
+        "customerName":  {{ customer.name | json | default: "null" }},
+        "cartToken":     {{ cart.token | json | default: "null" }},
+        "cartItemCount": {{ cart.item_count | json }},
+        "isLoggedIn":    {% if customer %}true{% else %}false{% endif %},
+        "template":      {{ template.name | json }}
+      }
     </script>
+    <script src="{{ 'shopify-context.js' | asset_url }}" defer></script>
 
     {% unless is_native_page %}
       <div id="root"></div>

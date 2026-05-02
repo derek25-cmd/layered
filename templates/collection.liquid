@@ -76,7 +76,6 @@
       <select
         id="sort-select"
         class="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:border-black outline-none bg-white"
-        onchange="window.location.href = window.location.pathname + '?sort_by=' + this.value"
       >
         <option value="manual"           {% if collection.sort_by == 'manual' %}selected{% endif %}>Featured</option>
         <option value="best-selling"     {% if collection.sort_by == 'best-selling' %}selected{% endif %}>Best Selling</option>
@@ -189,48 +188,4 @@
 </div>
 
 {%- comment -%} ── Category filter script ── {%- endcomment -%}
-<script>
-(function () {
-  const buttons = document.querySelectorAll('.filter-btn');
-  const cards   = document.querySelectorAll('#product-grid .product-card');
-
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const filter = btn.dataset.filter;
-
-      // Update button active state
-      buttons.forEach(b => {
-        const active = b === btn;
-        b.classList.toggle('bg-black',    active);
-        b.classList.toggle('text-white',  active);
-        b.classList.toggle('border-black', active);
-        b.classList.toggle('bg-white',    !active);
-        b.classList.toggle('text-gray-700', !active);
-        b.classList.toggle('border-gray-300', !active);
-        b.setAttribute('aria-pressed', active ? 'true' : 'false');
-      });
-
-      // Show/hide product cards
-      let visibleCount = 0;
-      cards.forEach(card => {
-        const show = filter === 'All' || card.dataset.category === filter;
-        card.style.display = show ? '' : 'none';
-        if (show) visibleCount++;
-      });
-
-      // Empty state message
-      const grid = document.getElementById('product-grid');
-      const existingMsg = document.getElementById('filter-empty-msg');
-      if (visibleCount === 0 && !existingMsg) {
-        const msg = document.createElement('p');
-        msg.id = 'filter-empty-msg';
-        msg.className = 'col-span-full text-center text-gray-500 py-12';
-        msg.textContent = 'No ' + filter + ' products found.';
-        grid.appendChild(msg);
-      } else if (visibleCount > 0 && existingMsg) {
-        existingMsg.remove();
-      }
-    });
-  });
-})();
-</script>
+<script src="{{ 'collection-filters.js' | asset_url }}" defer></script>
