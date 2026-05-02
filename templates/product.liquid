@@ -301,36 +301,30 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0ZWFqY3R5cGlrcnlxaG9xcmlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MTcxMDIsImV4cCI6MjA5MzI5MzEwMn0.7o5WccE-1-MVgphufJIG8XoVtXLczcU1Wfgr3Vp0Tgc';
   const VTO_ENDPOINT      = SUPABASE_URL + '/functions/v1/virtual-tryon';
 
-  const PRODUCT_TITLE   = {{ product.title | json }};
-  const PRODUCT_TYPE    = {{ product.product_type | json }};
-  // Rendered server-side — not editable by the customer in the browser
-  const VTO_CUSTOMER    = {{ customer.email | default: '' | json }};
-  const VTO_IS_PRO      = {% if customer and customer.tags contains 'Pro Member' %}true{% else %}false{% endif %};
+  const PRODUCT_TITLE = {{ product.title | json }};
+  const PRODUCT_TYPE  = {{ product.product_type | json }};
 
-  const vtoFileInput     = document.getElementById('vto-user-image');
+  // Liquid renders these server-side. var (not const) so the fallback can reassign.
+  var VTO_CUSTOMER = {{ customer.email | default: '' | json }};
+  var VTO_IS_PRO   = {% if customer and customer.tags contains 'Pro Member' %}true{% else %}false{% endif %};
+
+  // If Liquid gave no email, pull from __SHOPIFY_CONTEXT__ (also Liquid-rendered in theme.liquid)
+  (function() {
+    if (VTO_CUSTOMER) return;
+    var ctx = window.__SHOPIFY_CONTEXT__;
+    if (ctx && ctx.customerEmail && ctx.customerEmail !== 'null' && ctx.customerEmail !== null) {
+      VTO_CUSTOMER = ctx.customerEmail;
+    }
+  })();
+
   const vtoBtn           = document.getElementById('vto-generate-btn');
+  const vtoFileInput     = document.getElementById('vto-user-image');
   const vtoLoading       = document.getElementById('vto-loading');
   const vtoResultWrap    = document.getElementById('vto-result-container');
   const vtoResultImg     = document.getElementById('vto-result-image');
   const vtoDownloadBtn   = document.getElementById('vto-download-btn');
   const vtoQuotaBadge    = document.getElementById('vto-quota-badge');
   const vtoUpgradePrompt = document.getElementById('vto-upgrade-prompt');
-
-  // ── Login gate correction ────────────────────────────────────────────────
-  // Liquid sets initial visibility server-side. JS re-checks using
-  // window.__SHOPIFY_CONTEXT__.isLoggedIn (also Liquid-rendered in theme.liquid)
-  // so a stale CDN cache can never strand a signed-in customer on the gate.
-  (function syncLoginGate() {
-    var ctx        = window.__SHOPIFY_CONTEXT__;
-    var loggedIn   = (ctx && ctx.isLoggedIn) || VTO_CUSTOMER !== '';
-    var gate       = document.getElementById('vto-login-gate');
-    var mainUI     = document.getElementById('vto-main-ui');
-    if (!gate || !mainUI) return;
-    gate.style.display   = loggedIn ? 'none' : '';
-    mainUI.style.display = loggedIn ? ''     : 'none';
-  })();
-
-  if (!vtoBtn) return;
 
   let vtoQuotaExhausted = false;
 
@@ -353,84 +347,129 @@
     }
     if (remaining <= 0) {
       vtoQuotaExhausted = true;
-      vtoBtn.disabled   = true;
+      if (vtoBtn) vtoBtn.disabled = true;
       if (vtoUpgradePrompt && plan === 'free') vtoUpgradePrompt.classList.remove('hidden');
     }
   }
 
-  // Fetch quota as soon as the page loads so the badge is accurate immediately
-  (async function loadQuota() {
-    try {
-      const res  = await fetch(VTO_ENDPOINT, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-        body:    JSON.stringify({ customer_email: VTO_CUSTOMER, is_pro: VTO_IS_PRO, check_only: true })
-      });
-      const data = await res.json();
-      if (data.quota) applyQuota(data.quota);
-    } catch { /* silent — badge stays empty */ }
-  })();
+  function loadQuota() {
+    if (!VTO_CUSTOMER) return;
+    fetch(VTO_ENDPOINT, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body:    JSON.stringify({ customer_email: VTO_CUSTOMER, is_pro: VTO_IS_PRO, check_only: true })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (d.quota) applyQuota(d.quota); })
+    .catch(function()  { if (vtoQuotaBadge) vtoQuotaBadge.textContent = '— / —'; });
+  }
 
-  vtoBtn.addEventListener('click', async () => {
-    if (!vtoFileInput.files || !vtoFileInput.files.length) {
-      alert('Please upload your photo first.');
+  function initGenerateButton() {
+    if (!vtoBtn) return;
+    vtoBtn.addEventListener('click', async () => {
+      if (!vtoFileInput || !vtoFileInput.files || !vtoFileInput.files.length) {
+        alert('Please upload your photo first.');
+        return;
+      }
+
+      vtoBtn.disabled = true;
+      vtoLoading.classList.remove('hidden');
+      vtoResultWrap.classList.add('hidden');
+
+      try {
+        const photoBase64 = await fileToBase64(vtoFileInput.files[0]);
+
+        const res = await fetch(VTO_ENDPOINT, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+          body:    JSON.stringify({
+            customer_email: VTO_CUSTOMER,
+            is_pro:         VTO_IS_PRO,
+            photo:          photoBase64,
+            outfit: [{
+              label: PRODUCT_TYPE || PRODUCT_TITLE,
+              title: PRODUCT_TITLE,
+              image: mainImage.src
+            }]
+          })
+        });
+
+        const data = await res.json();
+        if (data.quota) applyQuota(data.quota);
+
+        if (res.status === 429) {
+          if (vtoUpgradePrompt && !VTO_IS_PRO) vtoUpgradePrompt.classList.remove('hidden');
+          throw new Error(data.error || 'Generation limit reached.');
+        }
+        if (!res.ok)     throw new Error(data.error || 'Generation failed');
+        if (!data.image) throw new Error('No image returned from server');
+
+        vtoResultImg.src = data.image;
+        vtoResultWrap.classList.remove('hidden');
+
+        if (vtoDownloadBtn) {
+          vtoDownloadBtn.classList.remove('hidden');
+          vtoDownloadBtn.onclick = () => {
+            const a    = document.createElement('a');
+            a.href     = data.image;
+            a.download = 'layered-tryon.png';
+            a.click();
+          };
+        }
+
+      } catch (err) {
+        console.error('VTO error:', err);
+        alert(err.message || 'An error occurred. Please try again.');
+      } finally {
+        if (!vtoQuotaExhausted) vtoBtn.disabled = false;
+        vtoLoading.classList.add('hidden');
+      }
+    });
+  }
+
+  // ── Async login gate (three-layer check) ──────────────────────────────────
+  // Layer 1: Liquid inline style (set at render time — instant, no flash)
+  // Layer 2: window.__SHOPIFY_CONTEXT__.isLoggedIn (also Liquid, cross-checks)
+  // Layer 3: GET /account fetch (authoritative — Shopify redirects to /account/login
+  //          when the session is invalid, so we can detect stale-cache mismatches)
+  (async function initLoginGate() {
+    var gate   = document.getElementById('vto-login-gate');
+    var mainUI = document.getElementById('vto-main-ui');
+    if (!gate || !mainUI) return;
+
+    // Layer 1 + 2 fast check
+    var ctx      = window.__SHOPIFY_CONTEXT__;
+    var loggedIn = VTO_CUSTOMER !== '' || !!(ctx && ctx.isLoggedIn);
+
+    if (!loggedIn) {
+      // Layer 3: authoritative session check — /account → /account/login when not signed in
+      try {
+        var r = await fetch('/account', { redirect: 'follow' });
+        loggedIn = r.ok && !r.url.includes('/account/login');
+      } catch { /* keep loggedIn = false */ }
+    }
+
+    gate.style.display   = loggedIn ? 'none' : '';
+    mainUI.style.display = loggedIn ? ''     : 'none';
+
+    if (!loggedIn) return;
+
+    // Logged in but no customer email means Liquid was stale (cached page).
+    // Force one hard reload to get fresh server rendering; guard against loops.
+    if (!VTO_CUSTOMER) {
+      var reloadKey = 'vto_reload|' + location.pathname;
+      if (!sessionStorage.getItem(reloadKey)) {
+        sessionStorage.setItem(reloadKey, '1');
+        location.reload(true);
+        return;
+      }
+      // Reload didn't recover the email — show UI but skip quota tracking
       return;
     }
 
-    vtoBtn.disabled = true;
-    vtoLoading.classList.remove('hidden');
-    vtoResultWrap.classList.add('hidden');
-
-    try {
-      const photoBase64 = await fileToBase64(vtoFileInput.files[0]);
-
-      const res = await fetch(VTO_ENDPOINT, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-        body:    JSON.stringify({
-          customer_email: VTO_CUSTOMER,
-          is_pro:         VTO_IS_PRO,
-          photo:          photoBase64,
-          outfit: [{
-            label: PRODUCT_TYPE || PRODUCT_TITLE,
-            title: PRODUCT_TITLE,
-            image: mainImage.src
-          }]
-        })
-      });
-
-      const data = await res.json();
-
-      // Always sync badge to latest quota from server
-      if (data.quota) applyQuota(data.quota);
-
-      if (res.status === 429) {
-        if (vtoUpgradePrompt && !VTO_IS_PRO) vtoUpgradePrompt.classList.remove('hidden');
-        throw new Error(data.error || 'Generation limit reached.');
-      }
-      if (!res.ok)     throw new Error(data.error || 'Generation failed');
-      if (!data.image) throw new Error('No image returned from server');
-
-      vtoResultImg.src = data.image;
-      vtoResultWrap.classList.remove('hidden');
-
-      if (vtoDownloadBtn) {
-        vtoDownloadBtn.classList.remove('hidden');
-        vtoDownloadBtn.onclick = () => {
-          const a    = document.createElement('a');
-          a.href     = data.image;
-          a.download = 'layered-tryon.png';
-          a.click();
-        };
-      }
-
-    } catch (err) {
-      console.error('VTO error:', err);
-      alert(err.message || 'An error occurred. Please try again.');
-    } finally {
-      if (!vtoQuotaExhausted) vtoBtn.disabled = false;
-      vtoLoading.classList.add('hidden');
-    }
-  });
+    sessionStorage.removeItem('vto_reload|' + location.pathname);
+    loadQuota();
+    initGenerateButton();
+  })();
 })();
 </script>
