@@ -107,13 +107,23 @@
       {% endform %}
 
       <!-- VIRTUAL TRY-ON AI FEATURE -->
-      {% if customer %}
-        <div class="virtual-try-on-container border rounded-xl p-4 md:p-6 mt-6 md:mt-8 bg-white shadow-sm ring-1 ring-border">
-          <div class="flex items-center gap-3 mb-3 md:mb-4">
-            <svg class="w-5 h-5 md:w-6 md:h-6 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-            <h3 class="text-lg md:text-xl font-bold font-display">Virtual Try-On (AI)</h3>
-            <span id="vto-quota-badge" class="ml-auto text-xs font-medium text-gray-400" aria-live="polite"></span>
-          </div>
+      <div class="virtual-try-on-container border rounded-xl p-4 md:p-6 mt-6 md:mt-8 bg-white shadow-sm ring-1 ring-border">
+        <div class="flex items-center gap-3 mb-3 md:mb-4">
+          <svg class="w-5 h-5 md:w-6 md:h-6 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+          <h3 class="text-lg md:text-xl font-bold font-display">Virtual Try-On (AI)</h3>
+          <span id="vto-quota-badge" class="ml-auto text-xs font-medium text-gray-400" aria-live="polite"></span>
+        </div>
+
+        <!-- Login gate: hidden by Liquid when logged in; JS double-checks on load -->
+        <div id="vto-login-gate" {% if customer %}style="display:none"{% endif %}>
+          <p class="text-sm text-gray-600 mb-4">Sign in to try on this item with AI — free for every account.</p>
+          <a href="/account/login?return_url={{ request.path | url_encode }}" class="block w-full border-2 border-black bg-white text-black font-bold py-3 rounded hover:bg-gray-50 transition-colors text-center">
+            Sign In to Try On
+          </a>
+        </div>
+
+        <!-- Main VTO UI: hidden by Liquid when logged out; JS double-checks on load -->
+        <div id="vto-main-ui" {% unless customer %}style="display:none"{% endunless %}>
           <p class="text-sm text-gray-600 mb-4">Upload a photo of yourself to see how this item looks on you.</p>
           <div class="vto-upload-area mb-4">
             <input type="file" id="vto-user-image" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-colors cursor-pointer border border-dashed border-gray-300 rounded-md p-2">
@@ -145,18 +155,7 @@
             </div>
           </div>
         </div>
-      {% else %}
-        <div class="virtual-try-on-container border rounded-xl p-4 md:p-6 mt-6 md:mt-8 bg-white shadow-sm ring-1 ring-border">
-          <div class="flex items-center gap-3 mb-3">
-            <svg class="w-5 h-5 md:w-6 md:h-6 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-            <h3 class="text-lg md:text-xl font-bold font-display">Virtual Try-On (AI)</h3>
-          </div>
-          <p class="text-sm text-gray-600 mb-4">Sign in to try on this item with AI — free for all members.</p>
-          <a href="/account/login?return_url={{ request.path | url_encode }}" class="block w-full border-2 border-black bg-white text-black font-bold py-3 rounded hover:bg-gray-50 transition-colors text-center">
-            Sign In to Try On
-          </a>
-        </div>
-      {% endif %}
+      </div>
     </div>
   </div>
 </div>
@@ -317,7 +316,20 @@
   const vtoQuotaBadge    = document.getElementById('vto-quota-badge');
   const vtoUpgradePrompt = document.getElementById('vto-upgrade-prompt');
 
-  // No VTO UI rendered when customer is not logged in
+  // ── Login gate correction ────────────────────────────────────────────────
+  // Liquid sets initial visibility server-side. JS re-checks using
+  // window.__SHOPIFY_CONTEXT__.isLoggedIn (also Liquid-rendered in theme.liquid)
+  // so a stale CDN cache can never strand a signed-in customer on the gate.
+  (function syncLoginGate() {
+    var ctx        = window.__SHOPIFY_CONTEXT__;
+    var loggedIn   = (ctx && ctx.isLoggedIn) || VTO_CUSTOMER !== '';
+    var gate       = document.getElementById('vto-login-gate');
+    var mainUI     = document.getElementById('vto-main-ui');
+    if (!gate || !mainUI) return;
+    gate.style.display   = loggedIn ? 'none' : '';
+    mainUI.style.display = loggedIn ? ''     : 'none';
+  })();
+
   if (!vtoBtn) return;
 
   let vtoQuotaExhausted = false;
