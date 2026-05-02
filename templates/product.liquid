@@ -107,39 +107,56 @@
       {% endform %}
 
       <!-- VIRTUAL TRY-ON AI FEATURE -->
-      <div class="virtual-try-on-container border rounded-xl p-4 md:p-6 mt-6 md:mt-8 bg-white shadow-sm ring-1 ring-border">
-        <div class="flex items-center gap-3 mb-3 md:mb-4">
-          <svg class="w-5 h-5 md:w-6 md:h-6 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-          <h3 class="text-lg md:text-xl font-bold font-display">Virtual Try-On (AI)</h3>
-        </div>
-        <p class="text-sm text-gray-600 mb-4">Upload a photo of yourself to see how this item looks on you.</p>
-        <div class="vto-upload-area mb-4">
-          <input type="file" id="vto-user-image" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-colors cursor-pointer border border-dashed border-gray-300 rounded-md p-2">
-        </div>
-        <button id="vto-generate-btn" class="w-full border-2 border-black bg-white text-black font-bold py-3 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-          Generate AI Preview
-        </button>
-        <div id="vto-loading" class="hidden mt-6 flex flex-col items-center justify-center p-8 border rounded bg-gray-50">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
-          <p class="mt-4 text-sm font-medium text-gray-700">AI is rendering your look...</p>
-        </div>
-        <div id="vto-result-container" class="hidden mt-6">
-          <h4 class="font-medium mb-3 text-center">Your Virtual Look</h4>
-          <div class="aspect-[3/4] rounded-lg overflow-hidden border shadow-sm">
-            <img id="vto-result-image" src="" alt="Virtual Try-On Result" class="w-full h-full object-cover">
+      {% if customer %}
+        <div class="virtual-try-on-container border rounded-xl p-4 md:p-6 mt-6 md:mt-8 bg-white shadow-sm ring-1 ring-border">
+          <div class="flex items-center gap-3 mb-3 md:mb-4">
+            <svg class="w-5 h-5 md:w-6 md:h-6 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            <h3 class="text-lg md:text-xl font-bold font-display">Virtual Try-On (AI)</h3>
+            <span id="vto-quota-badge" class="ml-auto text-xs font-medium text-gray-400" aria-live="polite"></span>
           </div>
-          <div class="mt-3 flex items-center justify-between gap-3">
-            <p id="vto-quota" class="hidden text-xs text-gray-500"></p>
-            <button
-              id="vto-download-btn"
-              type="button"
-              class="hidden ml-auto text-xs font-medium border border-gray-300 rounded-lg px-4 py-2 hover:border-black transition-colors"
-            >
-              Download image
-            </button>
+          <p class="text-sm text-gray-600 mb-4">Upload a photo of yourself to see how this item looks on you.</p>
+          <div class="vto-upload-area mb-4">
+            <input type="file" id="vto-user-image" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-colors cursor-pointer border border-dashed border-gray-300 rounded-md p-2">
+          </div>
+          <button id="vto-generate-btn" class="w-full border-2 border-black bg-white text-black font-bold py-3 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            Generate AI Preview
+          </button>
+          <div id="vto-upgrade-prompt" class="hidden mt-3 rounded-lg border border-[#F2EBE3] bg-[#FAF8F5] p-3 text-center text-sm">
+            <p class="text-gray-700 mb-1">You've used all 3 free try-ons.</p>
+            <a href="/pages/pricing" class="font-semibold text-black underline underline-offset-2">Upgrade to Layered Pro</a><span class="text-gray-500"> for 100 per month.</span>
+          </div>
+          <div id="vto-loading" class="hidden mt-6 flex flex-col items-center justify-center p-8 border rounded bg-gray-50">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+            <p class="mt-4 text-sm font-medium text-gray-700">AI is rendering your look...</p>
+          </div>
+          <div id="vto-result-container" class="hidden mt-6">
+            <h4 class="font-medium mb-3 text-center">Your Virtual Look</h4>
+            <div class="aspect-[3/4] rounded-lg overflow-hidden border shadow-sm">
+              <img id="vto-result-image" src="" alt="Virtual Try-On Result" class="w-full h-full object-cover">
+            </div>
+            <div class="mt-3 flex items-center justify-end gap-3">
+              <button
+                id="vto-download-btn"
+                type="button"
+                class="hidden text-xs font-medium border border-gray-300 rounded-lg px-4 py-2 hover:border-black transition-colors"
+              >
+                Download image
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      {% else %}
+        <div class="virtual-try-on-container border rounded-xl p-4 md:p-6 mt-6 md:mt-8 bg-white shadow-sm ring-1 ring-border">
+          <div class="flex items-center gap-3 mb-3">
+            <svg class="w-5 h-5 md:w-6 md:h-6 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            <h3 class="text-lg md:text-xl font-bold font-display">Virtual Try-On (AI)</h3>
+          </div>
+          <p class="text-sm text-gray-600 mb-4">Sign in to try on this item with AI — free for all members.</p>
+          <a href="/account/login?return_url={{ request.path | url_encode }}" class="block w-full border-2 border-black bg-white text-black font-bold py-3 rounded hover:bg-gray-50 transition-colors text-center">
+            Sign In to Try On
+          </a>
+        </div>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -281,24 +298,29 @@
   })();
 
   // ─── Virtual Try-On ───────────────────────────────────────────────────────
-  // ─── Virtual Try-On ───────────────────────────────────────────────────────
-  // Mirrors the React VTO implementation: converts photo to base64,
-  // sends {photo, outfit} JSON to the Supabase Edge Function,
-  // and handles quota + download response exactly as the React app does.
-  const SUPABASE_URL      = 'https://enpcjcesyvjqugnxdslp.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVucGNqY2VzeXZqcXVnbnhkc2xwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4MDg4NTQsImV4cCI6MjA3NDM4NDg1NH0.B5aC5a_QRTSTCT4iZFbUwG_ZxiafG-JWm_UbafmHUJ8';
+  const SUPABASE_URL      = 'https://dteajctypikryqhoqrij.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0ZWFqY3R5cGlrcnlxaG9xcmlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MTcxMDIsImV4cCI6MjA5MzI5MzEwMn0.7o5WccE-1-MVgphufJIG8XoVtXLczcU1Wfgr3Vp0Tgc';
   const VTO_ENDPOINT      = SUPABASE_URL + '/functions/v1/virtual-tryon';
 
-  const PRODUCT_TITLE = {{ product.title | json }};
-  const PRODUCT_TYPE  = {{ product.product_type | json }};
+  const PRODUCT_TITLE   = {{ product.title | json }};
+  const PRODUCT_TYPE    = {{ product.product_type | json }};
+  // Rendered server-side — not editable by the customer in the browser
+  const VTO_CUSTOMER    = {{ customer.email | default: '' | json }};
+  const VTO_IS_PRO      = {% if customer and customer.tags contains 'Pro Member' %}true{% else %}false{% endif %};
 
-  const vtoFileInput   = document.getElementById('vto-user-image');
-  const vtoBtn         = document.getElementById('vto-generate-btn');
-  const vtoLoading     = document.getElementById('vto-loading');
-  const vtoResultWrap  = document.getElementById('vto-result-container');
-  const vtoResultImg   = document.getElementById('vto-result-image');
-  const vtoDownloadBtn = document.getElementById('vto-download-btn');
-  const vtoQuotaEl     = document.getElementById('vto-quota');
+  const vtoFileInput     = document.getElementById('vto-user-image');
+  const vtoBtn           = document.getElementById('vto-generate-btn');
+  const vtoLoading       = document.getElementById('vto-loading');
+  const vtoResultWrap    = document.getElementById('vto-result-container');
+  const vtoResultImg     = document.getElementById('vto-result-image');
+  const vtoDownloadBtn   = document.getElementById('vto-download-btn');
+  const vtoQuotaBadge    = document.getElementById('vto-quota-badge');
+  const vtoUpgradePrompt = document.getElementById('vto-upgrade-prompt');
+
+  // No VTO UI rendered when customer is not logged in
+  if (!vtoBtn) return;
+
+  let vtoQuotaExhausted = false;
 
   function fileToBase64(file) {
     return new Promise((resolve, reject) => {
@@ -309,74 +331,94 @@
     });
   }
 
-  if (vtoBtn) {
-    vtoBtn.addEventListener('click', async () => {
-      const isLoggedIn = window.__SHOPIFY_CONTEXT__ && window.__SHOPIFY_CONTEXT__.isLoggedIn;
-      if (!isLoggedIn) {
-        alert('Please sign in to use the AI Virtual Try-On.');
-        window.location.href = '/account/login';
-        return;
-      }
-      if (!vtoFileInput.files || !vtoFileInput.files.length) {
-        alert('Please upload your photo first.');
-        return;
-      }
-
-      vtoBtn.disabled = true;
-      vtoLoading.classList.remove('hidden');
-      vtoResultWrap.classList.add('hidden');
-
-      try {
-        const photoBase64 = await fileToBase64(vtoFileInput.files[0]);
-
-        const res = await fetch(VTO_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            'Content-Type':  'application/json',
-            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-          },
-          body: JSON.stringify({
-            photo: photoBase64,
-            outfit: [{
-              label: PRODUCT_TYPE || PRODUCT_TITLE,
-              title: PRODUCT_TITLE,
-              image: mainImage.src
-            }]
-          })
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Generation failed');
-        if (!data.image)  throw new Error('No image returned from server');
-
-        vtoResultImg.src = data.image;
-        vtoResultWrap.classList.remove('hidden');
-
-        // Show remaining quota if the function returns it
-        if (vtoQuotaEl && data.quota != null) {
-          vtoQuotaEl.textContent = data.quota + ' generations remaining';
-          vtoQuotaEl.classList.remove('hidden');
-        }
-
-        // Wire up download button
-        if (vtoDownloadBtn) {
-          vtoDownloadBtn.classList.remove('hidden');
-          vtoDownloadBtn.onclick = () => {
-            const a    = document.createElement('a');
-            a.href     = data.image;
-            a.download = 'layered-tryon.png';
-            a.click();
-          };
-        }
-
-      } catch (err) {
-        console.error('VTO error:', err);
-        alert(err.message || 'An error occurred. Please try again.');
-      } finally {
-        vtoBtn.disabled = false;
-        vtoLoading.classList.add('hidden');
-      }
-    });
+  function applyQuota(quota) {
+    if (!quota) return;
+    const { remaining, limit, plan } = quota;
+    if (vtoQuotaBadge) {
+      vtoQuotaBadge.textContent = plan === 'pro'
+        ? remaining + ' of ' + limit + ' left this month'
+        : remaining + ' of ' + limit + ' free tries left';
+    }
+    if (remaining <= 0) {
+      vtoQuotaExhausted = true;
+      vtoBtn.disabled   = true;
+      if (vtoUpgradePrompt && plan === 'free') vtoUpgradePrompt.classList.remove('hidden');
+    }
   }
+
+  // Fetch quota as soon as the page loads so the badge is accurate immediately
+  (async function loadQuota() {
+    try {
+      const res  = await fetch(VTO_ENDPOINT, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+        body:    JSON.stringify({ customer_email: VTO_CUSTOMER, is_pro: VTO_IS_PRO, check_only: true })
+      });
+      const data = await res.json();
+      if (data.quota) applyQuota(data.quota);
+    } catch { /* silent — badge stays empty */ }
+  })();
+
+  vtoBtn.addEventListener('click', async () => {
+    if (!vtoFileInput.files || !vtoFileInput.files.length) {
+      alert('Please upload your photo first.');
+      return;
+    }
+
+    vtoBtn.disabled = true;
+    vtoLoading.classList.remove('hidden');
+    vtoResultWrap.classList.add('hidden');
+
+    try {
+      const photoBase64 = await fileToBase64(vtoFileInput.files[0]);
+
+      const res = await fetch(VTO_ENDPOINT, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+        body:    JSON.stringify({
+          customer_email: VTO_CUSTOMER,
+          is_pro:         VTO_IS_PRO,
+          photo:          photoBase64,
+          outfit: [{
+            label: PRODUCT_TYPE || PRODUCT_TITLE,
+            title: PRODUCT_TITLE,
+            image: mainImage.src
+          }]
+        })
+      });
+
+      const data = await res.json();
+
+      // Always sync badge to latest quota from server
+      if (data.quota) applyQuota(data.quota);
+
+      if (res.status === 429) {
+        if (vtoUpgradePrompt && !VTO_IS_PRO) vtoUpgradePrompt.classList.remove('hidden');
+        throw new Error(data.error || 'Generation limit reached.');
+      }
+      if (!res.ok)     throw new Error(data.error || 'Generation failed');
+      if (!data.image) throw new Error('No image returned from server');
+
+      vtoResultImg.src = data.image;
+      vtoResultWrap.classList.remove('hidden');
+
+      if (vtoDownloadBtn) {
+        vtoDownloadBtn.classList.remove('hidden');
+        vtoDownloadBtn.onclick = () => {
+          const a    = document.createElement('a');
+          a.href     = data.image;
+          a.download = 'layered-tryon.png';
+          a.click();
+        };
+      }
+
+    } catch (err) {
+      console.error('VTO error:', err);
+      alert(err.message || 'An error occurred. Please try again.');
+    } finally {
+      if (!vtoQuotaExhausted) vtoBtn.disabled = false;
+      vtoLoading.classList.add('hidden');
+    }
+  });
 })();
 </script>
