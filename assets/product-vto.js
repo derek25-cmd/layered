@@ -251,23 +251,48 @@
     });
   }
 
-  // --- Async login gate (Robust Version) ---
-  (async function initLoginGate() {
+  // --- Synchronous login gate (Robust Version) ---
+  // Read login state from multiple authoritative sources that are always
+  // available in the DOM — no async fetch or reliance on window.__SHOPIFY_CONTEXT__
+  (function initLoginGate() {
     var gate   = document.getElementById('vto-login-gate');
     var mainUI = document.getElementById('vto-main-ui');
     if (!gate || !mainUI) return;
 
-    var ctx      = window.__SHOPIFY_CONTEXT__;
-    var loggedIn = VTO_CUSTOMER !== '' || !!(ctx && ctx.isLoggedIn);
+    // Source 1: CONFIG from #product-vto-config (rendered by Liquid on this page)
+    // VTO_CUSTOMER is already set from CONFIG.customerEmail above (line ~129).
 
-    // autoritative check if Liquid is stale
-    if (!loggedIn) {
+    // Source 2: Read the global shopify-context-data JSON block directly
+    // (always present in theme.liquid body, no dependency on shopify-context.js script)
+    if (!VTO_CUSTOMER) {
       try {
-        var r = await fetch('/account', { cache: 'no-store' });
-        // In Shopify, /account redirects to /account/login if not signed in.
-        // redirected is true if follow happened. 
-        loggedIn = r.ok && !r.redirected && !r.url.includes('/account/login');
-      } catch (e) { console.error('[VTO] Login check failed:', e); }
+        var ctxEl = document.getElementById('shopify-context-data');
+        if (ctxEl) {
+          var ctxData = JSON.parse(ctxEl.textContent);
+          if (ctxData.customerEmail && ctxData.customerEmail !== 'null' && ctxData.customerEmail !== null) {
+            VTO_CUSTOMER = ctxData.customerEmail;
+          }
+          if (ctxData.isLoggedIn && !VTO_IS_PRO) {
+            // We know they're logged in; pro status comes from CONFIG which is more reliable
+          }
+        }
+      } catch (e) { console.error('[VTO] Context parse failed:', e); }
+    }
+
+    // Source 3: window.__SHOPIFY_CONTEXT__ if it happens to be set already
+    if (!VTO_CUSTOMER) {
+      var ctx = window.__SHOPIFY_CONTEXT__;
+      if (ctx && ctx.customerEmail && ctx.customerEmail !== 'null' && ctx.customerEmail !== null) {
+        VTO_CUSTOMER = ctx.customerEmail;
+      }
+    }
+
+    // Determine login state: email present OR Liquid already rendered the gate hidden
+    var loggedIn = VTO_CUSTOMER !== '';
+
+    // Fallback: check if Liquid set the gate to display:none (meaning {% if customer %} was true)
+    if (!loggedIn) {
+      loggedIn = gate.style.display === 'none';
     }
 
     // Update UI visibility
@@ -280,41 +305,12 @@
       return;
     }
 
-    // If logged in but missing email/pro status (stale cache), try to recover from profile page
+    // If logged in but still no email, we can't do quota — show UI but without quota badge
     if (!VTO_CUSTOMER) {
-      try {
-        var r = await fetch('/pages/profile', { cache: 'no-store' });
-        if (r.ok) {
-          var text = await r.text();
-          var parser = new DOMParser();
-          var doc = parser.parseFromString(text, 'text/html');
-          var configEl = doc.getElementById('profile-page-config');
-          if (configEl) {
-            var config = JSON.parse(configEl.textContent);
-            if (config.customerEmail && config.customerEmail !== 'null') {
-              VTO_CUSTOMER = config.customerEmail;
-              VTO_IS_PRO   = !!config.isProMember;
-              console.log('[VTO] Recovered data from profile:', VTO_CUSTOMER, 'Pro:', VTO_IS_PRO);
-            }
-          }
-        }
-      } catch (e) { console.error('[VTO] Profile recovery failed:', e); }
-    }
-
-    // Final fallback: reload once if still missing email
-    if (!VTO_CUSTOMER) {
-      var reloadKey = 'vto_reload|' + location.pathname;
-      if (!sessionStorage.getItem(reloadKey)) {
-        sessionStorage.setItem(reloadKey, '1');
-        location.reload(true);
-        return;
-      }
-      // If we are here, we are logged in but have no email.
-      // Quota won't work, but we can't do much without email.
+      initGenerateButton();
       return;
     }
 
-    sessionStorage.removeItem('vto_reload|' + location.pathname);
     loadQuota();
     initGenerateButton();
   })();

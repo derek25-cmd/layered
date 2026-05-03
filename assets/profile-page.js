@@ -8,6 +8,55 @@
   const CONFIG = configEl ? JSON.parse(configEl.textContent) : {};
   const IS_PRO = CONFIG.isProMember || false;
 
+  // --- VTO Quota Loader ---
+  (function loadVtoQuota() {
+    var usageCard = document.getElementById('pf-usage-card');
+    if (!usageCard) return; // Not a Pro member or card not present
+
+    var customerEmail = CONFIG.customerEmail;
+    if (!customerEmail || customerEmail === 'null') {
+      // Try global context
+      try {
+        var ctxEl = document.getElementById('shopify-context-data');
+        if (ctxEl) {
+          var ctx = JSON.parse(ctxEl.textContent);
+          if (ctx.customerEmail && ctx.customerEmail !== 'null') customerEmail = ctx.customerEmail;
+        }
+      } catch (e) {}
+    }
+    if (!customerEmail || customerEmail === 'null') return;
+
+    var SUPABASE_URL      = 'https://dteajctypikryqhoqrij.supabase.co';
+    var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0ZWFqY3R5cGlrcnlxaG9xcmlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MTcxMDIsImV4cCI6MjA5MzI5MzEwMn0.7o5WccE-1-MVgphufJIG8XoVtXLczcU1Wfgr3Vp0Tgc';
+    var VTO_ENDPOINT      = SUPABASE_URL + '/functions/v1/virtual-tryon';
+
+    fetch(VTO_ENDPOINT, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+      body:    JSON.stringify({ customer_email: customerEmail, is_pro: IS_PRO, check_only: true })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d.quota) return;
+      var q = d.quota;
+      var used = q.limit - q.remaining;
+
+      var statUsed      = document.getElementById('pf-stat-used');
+      var statLimit     = document.getElementById('pf-stat-limit');
+      var statRemaining = document.getElementById('pf-stat-remaining');
+      var progressFill  = document.getElementById('pf-progress-fill');
+
+      if (statUsed)      statUsed.textContent      = used;
+      if (statLimit)     statLimit.textContent      = '/ ' + q.limit;
+      if (statRemaining) statRemaining.textContent  = q.remaining + ' Remaining';
+      if (progressFill)  progressFill.style.width   = Math.round((used / q.limit) * 100) + '%';
+    })
+    .catch(function(e) {
+      console.error('[Profile] Quota fetch failed:', e);
+      var statRemaining = document.getElementById('pf-stat-remaining');
+      if (statRemaining) statRemaining.textContent = 'Unavailable';
+    });
+  })();
   // --- Navbar JS ---
   (function() {
     var header     = document.getElementById('lp-header');
