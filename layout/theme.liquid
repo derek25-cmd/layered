@@ -81,10 +81,12 @@
         "cartToken":     {{ cart.token | json | default: "null" }},
         "cartItemCount": {{ cart.item_count | json }},
         "isLoggedIn":    {% if customer %}true{% else %}false{% endif %},
+        "isProMember":   {% if customer and customer.tags contains 'Pro Member' %}true{% else %}false{% endif %},
         "template":      {{ template.name | json }}
       }
     </script>
     <script src="{{ 'shopify-context.js' | asset_url }}" defer></script>
+    <script src="{{ 'pro-discount-cart.js' | asset_url }}" defer></script>
 
     {% unless is_native_page %}
       <div id="root"></div>
