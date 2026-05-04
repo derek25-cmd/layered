@@ -21,6 +21,9 @@
   const thumbnails   = Array.from(document.querySelectorAll('.thumbnail-item'));
   const thumbnailStrip = document.getElementById('thumbnail-strip');
 
+  // Track the specific variant image for VTO to avoid using stale gallery images
+  let currentVtoImage = mainImage ? mainImage.src : '';
+
   // --- Helpers ---
   function baseUrl(url) {
     if (!url) return '';
@@ -56,11 +59,37 @@
     }
 
     const imageUrl = resolveVariantImage(variant);
-    if (imageUrl) setMainImage(imageUrl);
+    if (imageUrl) {
+      setMainImage(imageUrl);
+      currentVtoImage = imageUrl;
+    }
+
+    // Dispatch custom event for external listeners and internal sync
+    document.dispatchEvent(new CustomEvent('variant:change', {
+      detail: { variant: variant }
+    }));
 
     history.replaceState(null, '', window.location.pathname + '?variant=' + variant.id);
     highlightThumbnailByMediaId(variant.mediaId, imageUrl);
   }
+
+  // --- Event: Listen for Variant Changes (Requirement 1 & 2) ---
+  document.addEventListener('variant:change', (event) => {
+    const variant = event.detail.variant;
+    if (!variant) return;
+
+    // Prioritize variant's specific media/image over defaults
+    const imageUrl = variant.image || (variant.featured_media ? variant.featured_media.preview_image.src : null);
+    
+    if (imageUrl) {
+      currentVtoImage = imageUrl;
+      // Sync gallery if needed (prevents mismatch)
+      if (mainImage && mainImage.src !== imageUrl) setMainImage(imageUrl);
+      
+      const mediaId = variant.mediaId || (variant.featured_media ? variant.featured_media.id : null);
+      highlightThumbnailByMediaId(mediaId, imageUrl);
+    }
+  });
 
   function setMainImage(url) {
     if (!url || !mainImage) return;
@@ -241,7 +270,7 @@
             outfit: [{
               label: PRODUCT_TYPE || PRODUCT_TITLE,
               title: PRODUCT_TITLE,
-              image: mainImage.src
+              image: currentVtoImage || mainImage.src
             }]
           })
         });
