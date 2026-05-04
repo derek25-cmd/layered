@@ -91,6 +91,18 @@
       <script type="module" src="{{ 'layered-app.js' | asset_url }}"></script>
     {% endunless %}
 
+    <script>
+      // Global state for Virtual Try-On image tracking (Shared between Liquid and React)
+      window.currentVtoImage = '';
+      
+      // Listen for the custom variant:change event dispatched by product-vto.js
+      document.addEventListener('variant:change', function(e) {
+        if (e.detail && e.detail.variant) {
+          window.currentVtoImage = e.detail.variant.image || e.detail.variant.featured_image;
+        }
+      });
+    </script>
+
     {{ content_for_layout }}
   </body>
 </html>

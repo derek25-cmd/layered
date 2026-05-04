@@ -62,6 +62,7 @@
     if (imageUrl) {
       setMainImage(imageUrl);
       currentVtoImage = imageUrl;
+      window.currentVtoImage = imageUrl; // Sync to global state for other components
     }
 
     // Dispatch custom event for external listeners and internal sync
