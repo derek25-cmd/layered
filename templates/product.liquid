@@ -33,6 +33,7 @@
             type="button"
             class="thumbnail-item w-20 h-28 sm:w-24 sm:h-32 flex-shrink-0 bg-gray-100 rounded cursor-pointer border-2 border-transparent hover:border-gray-400 transition-colors overflow-hidden focus:outline-none focus:ring-2 focus:ring-black"
             data-image-url="{{ image | image_url: width: 1000 }}"
+            data-media-id="{{ image.id }}"
             data-variant-id="{{ linked_variant_id }}"
             aria-label="View image {{ forloop.index }} of {{ product.images.size }}"
           >
@@ -90,7 +91,7 @@
               value="{{ variant.id }}"
               data-price="{{ variant.price | money }}"
               data-price-raw="{{ variant.price }}"
-              data-image="{{ variant.featured_image | image_url: width: 1000 }}"
+              data-image="{{ variant.featured_media | image_url: width: 1000 | default: variant.featured_image | image_url: width: 1000 }}"
               data-available="{{ variant.available }}"
               {% if variant == product.selected_or_first_available_variant %}selected="selected"{% endif %}
             >{{ variant.title }}</option>
@@ -168,7 +169,8 @@
       "title": {{ variant.title | json }},
       "price": {{ variant.price | money | json }},
       "available": {{ variant.available | json }},
-      "image": {{ variant.featured_image | image_url: width: 1000 | json }},
+      "image": {{ variant.featured_media | image_url: width: 1000 | default: variant.featured_image | image_url: width: 1000 | json }},
+      "mediaId": {{ variant.featured_media.id | default: variant.featured_image.id | json }},
       "options": [{% for opt in variant.options %}{{ opt | json }}{% unless forloop.last %},{% endunless %}{% endfor %}]
     }{% unless forloop.last %},{% endunless %}
     {% endfor %}

@@ -33,6 +33,17 @@
     ) || null;
   }
 
+  function resolveVariantImage(variant) {
+    // 1. Prefer image from JSON blob (sourced from featured_media in Liquid)
+    if (variant.image) return variant.image;
+    // 2. Fallback: read data-image from the hidden <select> option (always in DOM)
+    const opt = variantIdSel
+      ? variantIdSel.querySelector('option[value="' + variant.id + '"]')
+      : null;
+    if (opt && opt.dataset.image) return opt.dataset.image;
+    return null;
+  }
+
   function applyVariant(variant) {
     if (!variant) return;
 
@@ -44,12 +55,11 @@
       addToCartBtn.textContent = variant.available ? 'Add to Cart' : 'Sold Out';
     }
 
-    if (variant.image) {
-      setMainImage(variant.image);
-    }
+    const imageUrl = resolveVariantImage(variant);
+    if (imageUrl) setMainImage(imageUrl);
 
     history.replaceState(null, '', window.location.pathname + '?variant=' + variant.id);
-    highlightThumbnail(variant.image);
+    highlightThumbnailByMediaId(variant.mediaId, imageUrl);
   }
 
   function setMainImage(url) {
@@ -59,14 +69,32 @@
     mainImage.onload = () => { mainImage.style.opacity = '1'; };
   }
 
+  function highlightThumbnailByMediaId(mediaId, fallbackImageUrl) {
+    let matched = false;
+    // Strategy 1: match by data-media-id (most reliable, no URL ambiguity)
+    if (mediaId) {
+      thumbnails.forEach(thumb => {
+        const isActive = String(thumb.dataset.mediaId) === String(mediaId);
+        thumb.classList.toggle('border-black', isActive);
+        thumb.classList.toggle('border-transparent', !isActive);
+        if (isActive) matched = true;
+      });
+    }
+    // Strategy 2: fallback to URL base matching if no mediaId hit
+    if (!matched && fallbackImageUrl) {
+      const activeBase = baseUrl(fallbackImageUrl);
+      thumbnails.forEach(thumb => {
+        const thumbBase = baseUrl(thumb.dataset.imageUrl);
+        const isActive  = activeBase && thumbBase === activeBase;
+        thumb.classList.toggle('border-black', isActive);
+        thumb.classList.toggle('border-transparent', !isActive);
+      });
+    }
+  }
+
+  // Alias used by thumbnail-click path (URL-only context)
   function highlightThumbnail(activeImageUrl) {
-    const activeBase = baseUrl(activeImageUrl);
-    thumbnails.forEach(thumb => {
-      const thumbBase = baseUrl(thumb.dataset.imageUrl);
-      const isActive  = activeBase && thumbBase === activeBase;
-      thumb.classList.toggle('border-black', isActive);
-      thumb.classList.toggle('border-transparent', !isActive);
-    });
+    highlightThumbnailByMediaId(null, activeImageUrl);
   }
 
   // --- Event: dropdown variant select ---
@@ -114,7 +142,11 @@
   (function init() {
     if (variantIdSel) {
       const selected = VARIANTS.find(v => v.id === parseInt(variantIdSel.value, 10));
-      if (selected && selected.image) highlightThumbnail(selected.image);
+      if (selected) {
+        const imageUrl = resolveVariantImage(selected);
+        if (imageUrl) setMainImage(imageUrl);
+        highlightThumbnailByMediaId(selected.mediaId, imageUrl);
+      }
     }
   })();
 
