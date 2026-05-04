@@ -1,110 +1,122 @@
 /**
  * Pro Membership Discount Logic for React Cart
- * Automatically calculates and displays a 15% discount for "Pro Member" customers.
+ * Surgically updates prices for Pro Members without breaking React.
  */
 (function() {
   const DISCOUNT_PERCENT = 0.15;
+  let isProcessing = false;
+  let observer = null;
   
   function init() {
-    // Check eligibility from global context
     const ctx = window.__SHOPIFY_CONTEXT__;
     const isPro = ctx && (ctx.isProMember || (ctx.tags && ctx.tags.includes('Pro Member')));
-    
     if (!isPro) return;
 
-    console.log('[ProDiscount] Initialising for eligible member.');
+    console.log('[ProDiscount] Initialising...');
 
-    // Watch for cart changes
-    const observer = new MutationObserver(debounce(handleMutations, 100));
-    observer.observe(document.body, { childList: true, subtree: true });
-    
-    // Also run immediately
+    observer = new MutationObserver((mutations) => {
+      if (isProcessing) return;
+      
+      // Check if any mutation was outside our own changes
+      const hasExternalMutation = mutations.some(m => {
+        return !m.target.closest || (!m.target.closest('.pro-discount-wrap') && !m.target.closest('.pro-checkout-notice'));
+      });
+
+      if (hasExternalMutation) {
+        handleMutations();
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
     handleMutations();
   }
 
   function handleMutations() {
+    if (isProcessing) return;
+    
     const isCartPage = window.location.pathname.includes('/cart');
     const cartDrawer = document.querySelector('[role="dialog"], [class*="drawer"], [class*="Cart"]');
     const cartContainer = isCartPage ? document.body : cartDrawer;
-    
     if (!cartContainer) return;
 
-    // Aggressively find all potential price elements
-    // We look for text nodes that contain currency patterns
-    const walker = document.createTreeWalker(cartContainer, NodeFilter.SHOW_TEXT, null, false);
-    let node;
-    const targets = [];
+    isProcessing = true;
+    
+    try {
+      // 1. Process Prices
+      const walker = document.createTreeWalker(cartContainer, NodeFilter.SHOW_TEXT, null, false);
+      let node;
+      const priceNodes = [];
 
-    while(node = walker.nextNode()) {
-      const text = node.textContent.trim();
-      // Heuristic for price: Starts with $ or contains $ followed by numbers, or just numbers with 2 decimals
-      if (text.match(/^\$?\d+\.\d{2}$/) || (text.includes('$') && text.match(/\d/))) {
-        if (!node.parentElement.dataset.proDiscounted && !node.parentElement.closest('.pro-savings-line')) {
-          targets.push(node.parentElement);
+      while(node = walker.nextNode()) {
+        const text = node.textContent.trim();
+        // Regex for price-like strings
+        if (text.match(/^\$?\d+\.\d{2}$/) || (text.includes('$') && text.match(/\d/))) {
+          // Skip if already in our wrapper
+          if (!node.parentElement.closest('.pro-discount-wrap')) {
+            priceNodes.push(node);
+          }
         }
       }
+
+      priceNodes.forEach(node => {
+        const originalText = node.textContent.trim();
+        const priceMatch = originalText.match(/\d+\.\d{2}/) || originalText.match(/\d+/);
+        if (!priceMatch) return;
+
+        const originalPrice = parseFloat(priceMatch[0]);
+        if (isNaN(originalPrice) || originalPrice < 5) return; // Skip small numbers/quantities
+
+        const discountedPrice = originalPrice * (1 - DISCOUNT_PERCENT);
+        const currencySymbol = originalText.includes('$') ? '$' : '';
+        const formattedOriginal = currencySymbol + originalPrice.toFixed(2);
+        const formattedDiscounted = currencySymbol + discountedPrice.toFixed(2);
+
+        // Surgically wrap the text node
+        const span = document.createElement('span');
+        span.className = 'pro-discount-wrap';
+        span.style.display = 'inline-flex';
+        span.style.flexWrap = 'wrap';
+        span.style.alignItems = 'baseline';
+        span.innerHTML = `
+          <span style="text-decoration: line-through; opacity: 0.5; margin-right: 0.4em; font-size: 0.85em; font-weight: normal;">${formattedOriginal}</span>
+          <span style="font-weight: 700; color: #16a34a;">${formattedDiscounted}</span>
+        `;
+        
+        node.parentNode.replaceChild(span, node);
+      });
+
+      // 2. Summary & Notice
+      injectSummary(cartContainer);
+      injectNotice(cartContainer);
+
+    } catch (e) {
+      console.error('[ProDiscount] Error:', e);
+    } finally {
+      // Allow next cycle
+      setTimeout(() => { isProcessing = false; }, 50);
     }
-
-    if (targets.length === 0) return;
-
-    targets.forEach(el => {
-      const originalText = el.textContent.trim();
-      const priceMatch = originalText.match(/\d+\.\d{2}/) || originalText.match(/\d+/);
-      if (!priceMatch) return;
-
-      const originalPrice = parseFloat(priceMatch[0]);
-      if (isNaN(originalPrice) || originalPrice <= 0) return;
-
-      const discountAmount = originalPrice * DISCOUNT_PERCENT;
-      const discountedPrice = originalPrice - discountAmount;
-      const currencySymbol = originalText.includes('$') ? '$' : '';
-
-      const formattedOriginal = currencySymbol + originalPrice.toFixed(2);
-      const formattedDiscounted = currencySymbol + discountedPrice.toFixed(2);
-
-      // Avoid modifying quantity numbers or small numbers that aren't likely prices
-      if (originalPrice < 5 && !originalText.includes('$')) return;
-
-      el.dataset.proDiscounted = "true";
-      el.dataset.originalAmount = originalPrice;
-      
-      // Replace content while preserving any other inner structure if possible, 
-      // but usually prices are simple text.
-      el.innerHTML = `
-        <span class="pro-original" style="text-decoration: line-through; opacity: 0.5; margin-right: 0.5em; font-size: 0.9em;">${formattedOriginal}</span>
-        <span class="pro-discounted" style="font-weight: 600; color: #000;">${formattedDiscounted}</span>
-      `;
-    });
-
-    injectSavingsSummary(cartContainer);
-    injectCheckoutNotice(cartContainer);
   }
 
-  function injectSavingsSummary(container) {
-    const summaryLabels = Array.from(container.querySelectorAll('div, span, p, h3'))
+  function injectSummary(container) {
+    const labels = Array.from(container.querySelectorAll('div, span, p, h3'))
       .filter(el => {
         const t = el.textContent.toLowerCase().trim();
         return t === 'subtotal' || t === 'total' || t.includes('estimated total');
       });
 
-    summaryLabels.forEach(label => {
+    labels.forEach(label => {
       const parent = label.parentElement;
       if (!parent || parent.querySelector('.pro-savings-line')) return;
 
-      const savingsLine = document.createElement('div');
-      savingsLine.className = 'pro-savings-line';
-      savingsLine.style.cssText = 'display:flex; justify-content:space-between; width:100%; color:#16a34a; font-size:0.9rem; margin:12px 0; font-weight:700; border-top:1px dashed #dcfce7; padding-top:12px;';
-      savingsLine.innerHTML = `
-        <span>Pro Member Discount (15%)</span>
-        <span>-15% Applied</span>
-      `;
-      
-      parent.appendChild(savingsLine);
+      const line = document.createElement('div');
+      line.className = 'pro-savings-line';
+      line.style.cssText = 'display:flex; justify-content:space-between; width:100%; color:#16a34a; font-size:0.85rem; margin:8px 0; font-weight:700; border-top:1px dashed #dcfce7; padding-top:8px;';
+      line.innerHTML = `<span>Pro Discount (15%)</span><span>-15% Applied</span>`;
+      parent.appendChild(line);
     });
   }
 
-  function injectCheckoutNotice(container) {
-    // Find checkout button
+  function injectNotice(container) {
     const checkoutBtn = Array.from(container.querySelectorAll('button, a'))
       .find(el => el.textContent.toLowerCase().includes('checkout'));
     
@@ -112,68 +124,10 @@
 
     const notice = document.createElement('div');
     notice.className = 'pro-checkout-notice';
-    notice.style.cssText = 'background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:12px; margin-bottom:16px; color:#166534; font-size:0.875rem; text-align:center; font-weight:500;';
-    notice.innerHTML = `
-      <div style="font-weight:700; margin-bottom:2px;">✨ Pro Member Discount Active</div>
-      Your 15% savings will be finalized at checkout.
-    `;
+    notice.style.cssText = 'background:#f0fdf4; border:1px solid #bbf7d0; border-radius:4px; padding:10px; margin-bottom:12px; color:#166534; font-size:0.8rem; text-align:center;';
+    notice.innerHTML = `<strong>✨ Pro Discount Active</strong><br>Savings finalized at checkout.`;
 
     checkoutBtn.parentNode.insertBefore(notice, checkoutBtn);
-  }
-
-  function processPriceElement(el) {
-    const originalText = el.textContent.trim();
-    const priceMatch = originalText.match(/\d+(\.\d{2})?/);
-    if (!priceMatch) return;
-
-    const originalPrice = parseFloat(priceMatch[0]);
-    const discountedPrice = originalPrice * (1 - DISCOUNT_PERCENT);
-    const currencySymbol = originalText.includes('$') ? '$' : '';
-
-    const formattedOriginal = currencySymbol + originalPrice.toFixed(2);
-    const formattedDiscounted = currencySymbol + discountedPrice.toFixed(2);
-
-    // Update the UI
-    el.dataset.proDiscounted = "true";
-    el.innerHTML = `
-      <span style="text-decoration: line-through; opacity: 0.5; margin-right: 8px;">${formattedOriginal}</span>
-      <span style="font-weight: bold; color: #000;">${formattedDiscounted}</span>
-    `;
-  }
-
-  function injectSavingsSummary(container) {
-    // Find the subtotal or total area
-    const totalArea = Array.from(container.querySelectorAll('div, span, p'))
-      .find(el => el.textContent.toLowerCase().includes('subtotal') || el.textContent.toLowerCase().includes('total'));
-    
-    if (!totalArea || container.querySelector('.pro-savings-line')) return;
-
-    // We'll try to find a place to insert the savings line
-    const summaryBlock = totalArea.closest('div');
-    if (!summaryBlock) return;
-
-    // This is tricky without exact selectors, but we'll try to append a savings line
-    const savingsLine = document.createElement('div');
-    savingsLine.className = 'pro-savings-line';
-    savingsLine.style.display = 'flex';
-    savingsLine.style.justifyContent = 'space-between';
-    savingsLine.style.color = '#2a7a4b';
-    savingsLine.style.fontSize = '0.875rem';
-    savingsLine.style.marginTop = '4px';
-    savingsLine.style.fontWeight = '600';
-    savingsLine.innerHTML = `
-      <span>Pro Member Savings (15%)</span>
-      <span id="pro-total-savings">Calculating...</span>
-    `;
-    
-    summaryBlock.appendChild(savingsLine);
-    updateTotalSavings(container);
-  }
-
-  function updateTotalSavings(container) {
-    // Heuristic: Total savings is 15% of the pre-discounted total
-    // But since we modified the prices in place, we should find the original total
-    // For now, let's just use a placeholder or try to find the new total
   }
 
   function debounce(func, wait) {
@@ -184,7 +138,6 @@
     };
   }
 
-  // Run on load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
