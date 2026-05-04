@@ -35,9 +35,10 @@
             data-image-url="{{ image | image_url: width: 1000 }}"
             data-media-id="{{ image.id }}"
             data-variant-id="{{ linked_variant_id }}"
+            data-alt="{{ image.alt | escape }}"
             aria-label="View image {{ forloop.index }} of {{ product.images.size }}"
           >
-            <img src="{{ image | image_url: width: 200 }}" alt="{{ product.title }}" class="w-full h-full object-cover pointer-events-none">
+            <img src="{{ image | image_url: width: 200 }}" alt="{{ image.alt | escape | default: product.title }}" class="w-full h-full object-cover pointer-events-none">
           </button>
         {% endfor %}
       </div>
@@ -182,7 +183,8 @@
     "productTitle": {{ product.title | json }},
     "productType": {{ product.product_type | json }},
     "customerEmail": {{ customer.email | default: "" | json }},
-    "isProMember": {% if customer and customer.tags contains 'Pro Member' %}true{% else %}false{% endif %}
+    "isProMember": {% if customer and customer.tags contains 'Pro Member' %}true{% else %}false{% endif %},
+    "colorOptionIndex": {% assign color_index = -1 %}{% for option in product.options %}{% assign downcased_option = option | downcase %}{% if downcased_option == 'color' or downcased_option == 'colour' %}{% assign color_index = forloop.index0 %}{% endif %}{% endfor %}{{ color_index }}
   }
 </script>
 

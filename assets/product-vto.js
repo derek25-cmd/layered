@@ -44,6 +44,8 @@
       ? variantIdSel.querySelector('option[value="' + variant.id + '"]')
       : null;
     if (opt && opt.dataset.image) return opt.dataset.image;
+    // 3. Absolute Fallback: First product image (as requested)
+    if (thumbnails.length > 0) return thumbnails[0].dataset.imageUrl;
     return null;
   }
 
@@ -63,6 +65,33 @@
       setMainImage(imageUrl);
       currentVtoImage = imageUrl;
       window.currentVtoImage = imageUrl; // Sync to global state for other components
+    }
+
+    // --- Gallery Filtering (Requirement: Show ONLY images for this color) ---
+    const colorIndex = CONFIG.colorOptionIndex;
+    const selectedColor = (colorIndex !== -1 && variant.options[colorIndex]) 
+      ? variant.options[colorIndex].toLowerCase() 
+      : null;
+
+    let matchCount = 0;
+    thumbnails.forEach(thumb => {
+      const thumbVariantId = thumb.dataset.variantId;
+      const thumbAlt = (thumb.dataset.alt || '').toLowerCase();
+      
+      const isIdMatch = thumbVariantId && thumbVariantId === String(variant.id);
+      const isColorMatch = selectedColor && (thumbAlt.includes(selectedColor) || thumbAlt === selectedColor);
+      
+      if (isIdMatch || isColorMatch) {
+        thumb.classList.remove('hidden');
+        matchCount++;
+      } else {
+        thumb.classList.add('hidden');
+      }
+    });
+
+    // If no images match this variant, show the first one as an absolute fallback
+    if (matchCount === 0 && thumbnails.length > 0) {
+      thumbnails[0].classList.remove('hidden');
     }
 
     // Dispatch custom event for external listeners and internal sync
@@ -173,9 +202,7 @@
     if (variantIdSel) {
       const selected = VARIANTS.find(v => v.id === parseInt(variantIdSel.value, 10));
       if (selected) {
-        const imageUrl = resolveVariantImage(selected);
-        if (imageUrl) setMainImage(imageUrl);
-        highlightThumbnailByMediaId(selected.mediaId, imageUrl);
+        applyVariant(selected);
       }
     }
   })();
