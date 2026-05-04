@@ -23,38 +23,38 @@
   }
 
   function handleMutations() {
-    // 1. Identify Cart Containers (Drawer or Page)
-    // The drawer typically has [role="dialog"] and contains "cart" in its content
-    // The page has /cart in the URL
     const isCartPage = window.location.pathname.includes('/cart');
-    const cartDrawer = document.querySelector('[role="dialog"]');
+    const cartDrawer = document.querySelector('[role="dialog"], [class*="drawer"], [class*="Cart"]');
     const cartContainer = isCartPage ? document.body : cartDrawer;
     
     if (!cartContainer) return;
-    if (!isCartPage && !cartContainer.textContent.toLowerCase().includes('cart')) return;
 
-    // 2. Identify Price Elements
-    // We look for elements that contain currency symbols and are likely prices
-    // We exclude already processed ones and common non-price numbers like quantity
-    const priceElements = Array.from(cartContainer.querySelectorAll('div, span, p, .text-sm, .text-lg'))
-      .filter(el => {
-        const text = el.textContent.trim();
-        // Matches $12.34 or 12.34
-        const isPriceFormat = text.match(/^\$?\d+(\.\d{2})?$/) || (text.includes('$') && text.match(/\d+/));
-        // Exclude elements with children to avoid nested modification
-        const hasNoChildren = el.children.length === 0;
-        return isPriceFormat && hasNoChildren;
-      })
-      .filter(el => !el.dataset.proDiscounted);
+    // Aggressively find all potential price elements
+    // We look for text nodes that contain currency patterns
+    const walker = document.createTreeWalker(cartContainer, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    const targets = [];
 
-    let totalSavings = 0;
+    while(node = walker.nextNode()) {
+      const text = node.textContent.trim();
+      // Heuristic for price: Starts with $ or contains $ followed by numbers, or just numbers with 2 decimals
+      if (text.match(/^\$?\d+\.\d{2}$/) || (text.includes('$') && text.match(/\d/))) {
+        if (!node.parentElement.dataset.proDiscounted && !node.parentElement.closest('.pro-savings-line')) {
+          targets.push(node.parentElement);
+        }
+      }
+    }
 
-    priceElements.forEach(el => {
+    if (targets.length === 0) return;
+
+    targets.forEach(el => {
       const originalText = el.textContent.trim();
-      const priceMatch = originalText.match(/\d+(\.\d{2})?/);
+      const priceMatch = originalText.match(/\d+\.\d{2}/) || originalText.match(/\d+/);
       if (!priceMatch) return;
 
       const originalPrice = parseFloat(priceMatch[0]);
+      if (isNaN(originalPrice) || originalPrice <= 0) return;
+
       const discountAmount = originalPrice * DISCOUNT_PERCENT;
       const discountedPrice = originalPrice - discountAmount;
       const currencySymbol = originalText.includes('$') ? '$' : '';
@@ -62,17 +62,63 @@
       const formattedOriginal = currencySymbol + originalPrice.toFixed(2);
       const formattedDiscounted = currencySymbol + discountedPrice.toFixed(2);
 
-      // Update the UI
+      // Avoid modifying quantity numbers or small numbers that aren't likely prices
+      if (originalPrice < 5 && !originalText.includes('$')) return;
+
       el.dataset.proDiscounted = "true";
-      el.dataset.originalPrice = originalPrice;
+      el.dataset.originalAmount = originalPrice;
+      
+      // Replace content while preserving any other inner structure if possible, 
+      // but usually prices are simple text.
       el.innerHTML = `
-        <span style="text-decoration: line-through; opacity: 0.5; margin-right: 6px; font-size: 0.9em;">${formattedOriginal}</span>
-        <span style="font-weight: 600; color: #000;">${formattedDiscounted}</span>
+        <span class="pro-original" style="text-decoration: line-through; opacity: 0.5; margin-right: 0.5em; font-size: 0.9em;">${formattedOriginal}</span>
+        <span class="pro-discounted" style="font-weight: 600; color: #000;">${formattedDiscounted}</span>
       `;
     });
 
-    // 3. Inject Savings Summary
     injectSavingsSummary(cartContainer);
+    injectCheckoutNotice(cartContainer);
+  }
+
+  function injectSavingsSummary(container) {
+    const summaryLabels = Array.from(container.querySelectorAll('div, span, p, h3'))
+      .filter(el => {
+        const t = el.textContent.toLowerCase().trim();
+        return t === 'subtotal' || t === 'total' || t.includes('estimated total');
+      });
+
+    summaryLabels.forEach(label => {
+      const parent = label.parentElement;
+      if (!parent || parent.querySelector('.pro-savings-line')) return;
+
+      const savingsLine = document.createElement('div');
+      savingsLine.className = 'pro-savings-line';
+      savingsLine.style.cssText = 'display:flex; justify-content:space-between; width:100%; color:#16a34a; font-size:0.9rem; margin:12px 0; font-weight:700; border-top:1px dashed #dcfce7; padding-top:12px;';
+      savingsLine.innerHTML = `
+        <span>Pro Member Discount (15%)</span>
+        <span>-15% Applied</span>
+      `;
+      
+      parent.appendChild(savingsLine);
+    });
+  }
+
+  function injectCheckoutNotice(container) {
+    // Find checkout button
+    const checkoutBtn = Array.from(container.querySelectorAll('button, a'))
+      .find(el => el.textContent.toLowerCase().includes('checkout'));
+    
+    if (!checkoutBtn || container.querySelector('.pro-checkout-notice')) return;
+
+    const notice = document.createElement('div');
+    notice.className = 'pro-checkout-notice';
+    notice.style.cssText = 'background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:12px; margin-bottom:16px; color:#166534; font-size:0.875rem; text-align:center; font-weight:500;';
+    notice.innerHTML = `
+      <div style="font-weight:700; margin-bottom:2px;">✨ Pro Member Discount Active</div>
+      Your 15% savings will be finalized at checkout.
+    `;
+
+    checkoutBtn.parentNode.insertBefore(notice, checkoutBtn);
   }
 
   function processPriceElement(el) {
