@@ -131,10 +131,17 @@
 
     {%- comment -%} Desktop nav links {%- endcomment -%}
     <nav class="hidden md:flex items-center gap-8">
-      <a href="/collections/all" class="lp-nav-link">Shop</a>
-      <a href="/outfit-builder" class="lp-nav-link">Create Outfit</a>
+      <a href="/" class="lp-nav-link">Home</a>
+      <a href="/shop" class="lp-nav-link">Shop</a>
+      <a href="/outfit-builder" class="lp-nav-link">Outfits</a>
       <a href="/ai-assistant" class="lp-nav-link">AI Stylist</a>
+      <a href="/pages/profile" class="lp-nav-link lp-nav-link--active">Profile</a>
       <a href="/pages/pricing" class="lp-nav-link">Pricing</a>
+      {% if customer %}
+        <a href="/account" class="lp-btn-nav-account">Account</a>
+      {% else %}
+        <a href="{{ routes.account_login_url }}" class="lp-btn-nav-account">Sign In</a>
+      {% endif %}
     </nav>
 
     {%- comment -%} Right rail — outfit icon + cart, mirroring Navbar.tsx right slot {%- endcomment -%}
@@ -160,12 +167,16 @@
   {%- comment -%} Mobile menu — glass panel matching Navbar.tsx animate-fade-in {%- endcomment -%}
   <div id="pf-mobile-menu" class="md:hidden hidden lp-mobile-panel border-t lp-mobile-border">
     <nav class="container max-w-7xl mx-auto px-6 py-6 flex flex-col gap-4">
-      <a href="/collections/all" class="text-lg font-display lp-mobile-link">Shop</a>
-      <a href="/outfit-builder" class="text-lg font-display lp-mobile-link">Create Outfit</a>
+      <a href="/" class="text-lg font-display lp-mobile-link">Home</a>
+      <a href="/shop" class="text-lg font-display lp-mobile-link">Shop</a>
+      <a href="/outfit-builder" class="text-lg font-display lp-mobile-link">Outfits</a>
       <a href="/ai-assistant" class="text-lg font-display lp-mobile-link">AI Stylist</a>
+      <a href="/pages/profile" class="text-lg font-display lp-mobile-link">Profile</a>
       <a href="/pages/pricing" class="text-lg font-display lp-mobile-link">Pricing</a>
       {% if customer %}
-        <a href="/pages/profile" class="text-lg font-display lp-mobile-link">Profile</a>
+        <a href="/account" class="text-lg font-display lp-mobile-link">Account</a>
+      {% else %}
+        <a href="{{ routes.account_login_url }}" class="text-lg font-display lp-mobile-link">Sign In</a>
       {% endif %}
     </nav>
   </div>
@@ -364,14 +375,21 @@
 <style>
   /* ── Layered Profile — Redesign ──────────────────────────────────────────── */
   :root {
-    --beige: #F2EBE3;
-    --beige-dark: #E8DDD3;
-    --beige-mid: #D4C9BE;
-    --black: #0E0E0E;
+    /* ── Layered Theme: Black · Light Beige/Tan · Light Gray ── */
+    --black:     #0E0E0E;
     --off-black: #1A1A1A;
     --soft-black: #2C2C2C;
-    --white: #FFFFFF;
-    --cream: #FAF8F5;
+
+    --beige:     #E8DCC8;
+    --beige-dark:#D9CBB1;
+    --beige-mid: #C8B89A;
+
+    --gray:      #D6D6D6;
+    --gray-mid:  #B8B8B8;
+    --gray-light:#EFEFEF;
+
+    --white:     #FFFFFF;
+    --cream:     hsl(42, 27%, 94%);
   }
 
   /* ── Base page ──────────────────────────────────────────────────────────── */
@@ -391,10 +409,10 @@
 
   /* Scrolled — glass + py-3 (matches `glass py-3` className in Navbar.tsx)  */
   .lp-nav.lp-nav--scrolled {
-    background: rgba(250, 248, 245, 0.88) !important;
+    background: rgba(237, 233, 225, 0.90) !important;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 1px 0 rgba(14,14,14,0.07);
+    box-shadow: 0 1px 0 rgba(14,14,14,0.09);
     padding-top: 0.75rem !important;
     padding-bottom: 0.75rem !important;
   }
@@ -438,6 +456,25 @@
   .lp-nav-link--active            { color: var(--black); }
   .lp-nav-link--active::after     { width: 100%; }
 
+  /* Sign In / Account pill button */
+  .lp-btn-nav-account {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    color: var(--black);
+    background: var(--beige);
+    text-decoration: none;
+    padding: 7px 16px;
+    border: 1px solid var(--beige-mid);
+    transition: background 0.2s ease, border-color 0.2s ease;
+    white-space: nowrap;
+  }
+  .lp-btn-nav-account:hover {
+    background: var(--beige-dark);
+    border-color: var(--beige-mid);
+  }
+
   /* Icon buttons — right rail (matches Navbar.tsx hover:bg-foreground/5 rounded-full) */
   .lp-icon-btn {
     padding: 8px;
@@ -453,7 +490,7 @@
 
   /* Mobile panel — glass + animate-fade-in (matches Navbar.tsx mobile open) */
   .lp-mobile-panel {
-    background: rgba(250,248,245,0.96);
+    background: rgba(237, 233, 225, 0.97);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     animation: lp-fade-in 0.18s ease forwards;
@@ -511,14 +548,14 @@
 
   /* ── Cards ──────────────────────────────────────────────────────────────── */
   .lp-card {
-    background: var(--white);
+    background: var(--gray-light);
     border: 1px solid rgba(14, 14, 14, 0.07);
     padding: 2.5rem;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
 
   .lp-card:hover {
-    border-color: rgba(14, 14, 14, 0.14);
+    border-color: var(--gray-mid);
     box-shadow: 0 8px 40px -12px rgba(14, 14, 14, 0.1);
   }
 
@@ -622,7 +659,7 @@
 
   .lp-progress-fill {
     height: 100%;
-    background: var(--black);
+    background: var(--beige-mid);
     transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
@@ -811,7 +848,7 @@
     margin: 0 auto;
     text-align: center;
     padding: 6rem 3rem;
-    background: var(--white);
+    background: var(--gray-light);
     border: 1px solid rgba(14, 14, 14, 0.07);
   }
 
@@ -843,7 +880,7 @@
 
   .lp-outfit-card-image {
     aspect-ratio: 3/4;
-    background: var(--beige);
+    background: var(--gray-light);
     margin-bottom: 10px;
     overflow: hidden;
     border: 1px solid rgba(14,14,14,0.06);

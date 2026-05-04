@@ -112,10 +112,17 @@
 
     {%- comment -%} Desktop nav links {%- endcomment -%}
     <nav class="hidden md:flex items-center gap-8">
-      <a href="/collections/all" class="lp-nav-link">Shop</a>
-      <a href="/outfit-builder" class="lp-nav-link">Create Outfit</a>
+      <a href="/" class="lp-nav-link">Home</a>
+      <a href="/shop" class="lp-nav-link">Shop</a>
+      <a href="/outfit-builder" class="lp-nav-link">Outfits</a>
       <a href="/ai-assistant" class="lp-nav-link">AI Stylist</a>
+      <a href="/pages/profile" class="lp-nav-link">Profile</a>
       <a href="/pages/pricing" class="lp-nav-link lp-nav-link--active">Pricing</a>
+      {% if customer %}
+        <a href="/account" class="lp-btn-nav-account">Account</a>
+      {% else %}
+        <a href="{{ routes.account_login_url }}" class="lp-btn-nav-account">Sign In</a>
+      {% endif %}
     </nav>
 
     {%- comment -%} Right rail — outfit icon + cart, mirroring Navbar.tsx right slot {%- endcomment -%}
@@ -141,12 +148,16 @@
   {%- comment -%} Mobile menu — glass panel matching Navbar.tsx animate-fade-in {%- endcomment -%}
   <div id="pr-mobile-menu" class="md:hidden hidden lp-mobile-panel border-t lp-mobile-border">
     <nav class="container max-w-7xl mx-auto px-6 py-6 flex flex-col gap-4">
-      <a href="/collections/all" class="text-lg font-display lp-mobile-link">Shop</a>
-      <a href="/outfit-builder" class="text-lg font-display lp-mobile-link">Create Outfit</a>
+      <a href="/" class="text-lg font-display lp-mobile-link">Home</a>
+      <a href="/shop" class="text-lg font-display lp-mobile-link">Shop</a>
+      <a href="/outfit-builder" class="text-lg font-display lp-mobile-link">Outfits</a>
       <a href="/ai-assistant" class="text-lg font-display lp-mobile-link">AI Stylist</a>
+      <a href="/pages/profile" class="text-lg font-display lp-mobile-link">Profile</a>
       <a href="/pages/pricing" class="text-lg font-display lp-mobile-link">Pricing</a>
       {% if customer %}
-        <a href="/pages/profile" class="text-lg font-display lp-mobile-link">Profile</a>
+        <a href="/account" class="text-lg font-display lp-mobile-link">Account</a>
+      {% else %}
+        <a href="{{ routes.account_login_url }}" class="text-lg font-display lp-mobile-link">Sign In</a>
       {% endif %}
     </nav>
   </div>
@@ -370,13 +381,20 @@
 <style>
   /* ── Layered Pricing — Redesign ──────────────────────────────────────────── */
   :root {
-    --beige: #F2EBE3;
-    --beige-dark: #E8DDD3;
-    --beige-mid: #D4C9BE;
-    --black: #0E0E0E;
-    --off-black: #1A1A1A;
-    --white: #FFFFFF;
-    --cream: #FAF8F5;
+    /* ── Layered Theme: Black · Light Beige/Tan · Light Gray ── */
+    --black:     #0E0E0E;          /* primary foreground, CTAs                  */
+    --off-black: #1A1A1A;          /* secondary dark surface                    */
+
+    --beige:     #E8DCC8;          /* light beige/tan — primary accent surface   */
+    --beige-dark:#D9CBB1;          /* slightly deeper tan for hover/borders      */
+    --beige-mid: #C8B89A;          /* mid-tan for rules, dots, progress          */
+
+    --gray:      #D6D6D6;          /* light gray — secondary surface             */
+    --gray-mid:  #B8B8B8;          /* mid-gray for borders, muted text           */
+    --gray-light:#EFEFEF;          /* near-white gray — card backgrounds         */
+
+    --white:     #FFFFFF;
+    --cream:     hsl(42, 27%, 94%);/* page background — soft off-white/tan paper */
   }
 
   /* ── Base ───────────────────────────────────────────────────────────────── */
@@ -391,8 +409,8 @@
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(ellipse 55% 45% at 80% 15%, rgba(242,235,227,0.55) 0%, transparent 65%),
-      radial-gradient(ellipse 40% 50% at 10% 85%, rgba(242,235,227,0.3) 0%, transparent 60%);
+      radial-gradient(ellipse 55% 45% at 80% 15%, rgba(232,220,200,0.45) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 50% at 10% 85%, rgba(214,214,214,0.25) 0%, transparent 60%);
     z-index: 0;
   }
 
@@ -405,10 +423,10 @@
 
   /* Scrolled — glass + py-3 (matches `glass py-3` className in Navbar.tsx)  */
   .lp-nav.lp-nav--scrolled {
-    background: rgba(250, 248, 245, 0.88) !important;
+    background: rgba(237, 233, 225, 0.90) !important;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 1px 0 rgba(14,14,14,0.07);
+    box-shadow: 0 1px 0 rgba(14,14,14,0.09);
     padding-top: 0.75rem !important;
     padding-bottom: 0.75rem !important;
   }
@@ -452,6 +470,25 @@
   .lp-nav-link--active            { color: var(--black); }
   .lp-nav-link--active::after     { width: 100%; }
 
+  /* Sign In / Account pill button */
+  .lp-btn-nav-account {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    color: var(--black);
+    background: var(--beige);
+    text-decoration: none;
+    padding: 7px 16px;
+    border: 1px solid var(--beige-mid);
+    transition: background 0.2s ease, border-color 0.2s ease;
+    white-space: nowrap;
+  }
+  .lp-btn-nav-account:hover {
+    background: var(--beige-dark);
+    border-color: var(--beige-mid);
+  }
+
   /* Icon buttons — right rail (matches Navbar.tsx hover:bg-foreground/5 rounded-full) */
   .lp-icon-btn {
     padding: 8px;
@@ -467,7 +504,7 @@
 
   /* Mobile panel — glass + animate-fade-in (matches Navbar.tsx mobile open) */
   .lp-mobile-panel {
-    background: rgba(250,248,245,0.96);
+    background: rgba(237, 233, 225, 0.97);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     animation: lp-fade-in 0.18s ease forwards;
@@ -550,7 +587,7 @@
   }
 
   .lp-plan--free {
-    background: var(--white);
+    background: var(--gray-light);
     border: 1px solid rgba(14, 14, 14, 0.08);
     transition: border-color 0.3s ease;
   }
@@ -742,11 +779,11 @@
     letter-spacing: 0.2em;
     font-weight: 700;
     text-decoration: none;
-    transition: transform 0.2s ease, opacity 0.2s;
+    transition: transform 0.2s ease, background 0.2s;
     text-align: center;
   }
 
-  .lp-btn-primary-inv:hover { opacity: 0.88; transform: translateY(-1px); }
+  .lp-btn-primary-inv:hover { background: var(--beige-dark); transform: translateY(-1px); }
   .lp-btn-primary-inv:active { transform: scale(0.98); }
 
   .lp-instant-note {
@@ -778,15 +815,15 @@
   }
 
   .lp-perk {
-    background: var(--white);
+    background: var(--gray-light);
     border: 1px solid rgba(14,14,14,0.07);
     padding: 2.5rem 2.75rem;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
 
   .lp-perk:hover {
-    border-color: rgba(14,14,14,0.15);
-    box-shadow: 0 6px 32px -8px rgba(14,14,14,0.08);
+    border-color: var(--gray-mid);
+    box-shadow: 0 6px 32px -8px rgba(14,14,14,0.1);
   }
 
   .lp-perk-stat {
