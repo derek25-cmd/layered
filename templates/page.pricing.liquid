@@ -6,6 +6,96 @@
   .shopify-section--footer { display: none !important; }
 </style>
 
+{%- comment -%} ── Google Fonts — Fraunces (display serif) + Inter (UI sans) ── {%- endcomment -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ── Layered Design System — Global Typography ── */
+  *, *::before, *::after { box-sizing: border-box; }
+
+  .font-display {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+  }
+
+  /* Tailwind-compatible utility shims used in the markup */
+  .text-2xl  { font-size: 1.5rem;   line-height: 2rem; }
+  .text-4xl  { font-size: 2.25rem;  line-height: 2.5rem; }
+  .text-lg   { font-size: 1.125rem; line-height: 1.75rem; }
+  .tracking-tight { letter-spacing: -0.025em; }
+
+  /* Tailwind flex/layout shims that may not be in the theme */
+  .flex           { display: flex; }
+  .items-center   { align-items: center; }
+  .items-start    { align-items: flex-start; }
+  .justify-between{ justify-content: space-between; }
+  .gap-2  { gap: 0.5rem; }
+  .gap-6  { gap: 1.5rem; }
+  .gap-8  { gap: 2rem; }
+  .gap-14 { gap: 3.5rem; }
+  .gap-3  { gap: 0.75rem; }
+  .gap-4  { gap: 1rem; }
+  .gap-1  { gap: 0.25rem; }
+  .flex-col     { flex-direction: column; }
+  .flex-shrink-0{ flex-shrink: 0; }
+  .hidden       { display: none; }
+  .w-full       { width: 100%; }
+  .block        { display: block; }
+  .inline-block { display: inline-block; }
+  .relative     { position: relative; }
+  .absolute     { position: absolute; }
+  .fixed        { position: fixed; }
+  .inset-x-0    { left: 0; right: 0; }
+  .inset-x-1    { left: 0.25rem; right: 0.25rem; }
+  .inset-x-2    { left: 0.5rem; right: 0.5rem; }
+  .top-0        { top: 0; }
+  .z-50         { z-index: 50; }
+  .py-5         { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+  .mx-auto      { margin-left: auto; margin-right: auto; }
+  .px-6         { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .px-8         { padding-left: 2rem; padding-right: 2rem; }
+  .py-6         { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+  .py-24        { padding-top: 6rem; padding-bottom: 6rem; }
+  .pt-20        { padding-top: 5rem; }
+  .max-w-7xl    { max-width: 80rem; }
+  .container    { width: 100%; }
+  .text-right   { text-align: right; }
+  .text-center  { text-align: center; }
+  .border-t     { border-top-width: 1px; border-top-style: solid; }
+  .overflow-hidden { overflow: hidden; }
+  .min-h-screen { min-height: 100vh; }
+  .space-y-1 > * + * { margin-top: 0.25rem; }
+  .mb-4  { margin-bottom: 1rem; }
+  .mb-5  { margin-bottom: 1.25rem; }
+  .mb-8  { margin-bottom: 2rem; }
+  .mb-10 { margin-bottom: 2.5rem; }
+  .mb-14 { margin-bottom: 3.5rem; }
+  .mb-28 { margin-bottom: 7rem; }
+  .mt-4  { margin-top: 1rem; }
+  .mt-8  { margin-top: 2rem; }
+  .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .w-7  { width: 1.75rem; }
+  .h-7  { height: 1.75rem; }
+  .h-\[6px\] { height: 6px; }
+  .top-\[10px\] { top: 10px; }
+  .top-\[20px\] { top: 20px; }
+
+  /* Hover translate shims */
+  .transition-transform { transition-property: transform; transition-timing-function: cubic-bezier(.4,0,.2,1); transition-duration: 150ms; }
+  .group:hover .group-hover\:-translate-y-0\.5 { transform: translateY(-2px); }
+  .group:hover .group-hover\:translate-y-0\.5  { transform: translateY(2px); }
+
+  @media (min-width: 768px) {
+    .md\:flex   { display: flex; }
+    .md\:hidden { display: none; }
+  }
+  @media (min-width: 640px) {
+    .sm\:flex   { display: flex; }
+  }
+</style>
+
 {%- comment -%} ── Navbar — mirrors Navbar.tsx layout & behaviour ── {%- endcomment -%}
 <header id="lp-header" class="lp-nav fixed top-0 inset-x-0 z-50 py-5 transition-all duration-500">
   <div class="container max-w-7xl mx-auto px-6 flex items-center justify-between gap-6">
@@ -951,3 +1041,104 @@
   }
 </script>
 <script src="{{ 'pricing-page.js' | asset_url }}" defer></script>
+
+{%- comment -%} ── Layered Design System — Navbar scroll morph + mobile menu ── {%- endcomment -%}
+<script>
+(function () {
+  'use strict';
+
+  /* ── Navbar scroll morph ─────────────────────────────────────────────────── */
+  var header = document.getElementById('lp-header');
+  var SCROLL_THRESHOLD = 24;
+
+  function onScroll () {
+    if (!header) return;
+    if (window.scrollY > SCROLL_THRESHOLD) {
+      header.classList.add('lp-nav--scrolled');
+    } else {
+      header.classList.remove('lp-nav--scrolled');
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll(); // apply immediately on load
+
+  /* ── Mobile menu toggle ──────────────────────────────────────────────────── */
+  var toggle   = document.getElementById('pr-menu-toggle');
+  var menu     = document.getElementById('pr-mobile-menu');
+  var iconMenu = document.getElementById('pr-icon-menu');
+  var iconClose= document.getElementById('pr-icon-close');
+  var isOpen   = false;
+
+  function openMenu () {
+    isOpen = true;
+    menu.classList.remove('hidden');
+    iconMenu.classList.add('hidden');
+    iconClose.classList.remove('hidden');
+    toggle.setAttribute('aria-expanded', 'true');
+    // Prevent body scroll while menu open
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMenu () {
+    isOpen = false;
+    menu.classList.add('hidden');
+    iconMenu.classList.remove('hidden');
+    iconClose.classList.add('hidden');
+    toggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  if (toggle && menu) {
+    toggle.addEventListener('click', function () {
+      isOpen ? closeMenu() : openMenu();
+    });
+
+    // Close on link click inside menu
+    menu.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', closeMenu);
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && isOpen) closeMenu();
+    });
+  }
+
+  /* ── Scroll reveal (IntersectionObserver) ────────────────────────────────── */
+  var revealEls = document.querySelectorAll('.reveal');
+
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+    revealEls.forEach(function (el) { observer.observe(el); });
+  } else {
+    // Fallback: show all immediately
+    revealEls.forEach(function (el) { el.classList.add('active'); });
+  }
+
+  /* ── Logo spring hover (bar parallax) ────────────────────────────────────── */
+  var logoLink = document.querySelector('a[aria-label="Layered home"]');
+  if (logoLink) {
+    var barTop = logoLink.querySelector('.lp-bar--top');
+    var barBot = logoLink.querySelector('.lp-bar--bot');
+
+    logoLink.addEventListener('mouseenter', function () {
+      if (barTop) { barTop.style.transform = 'translateY(-2px)'; barTop.style.transition = 'transform 0.35s cubic-bezier(.34,1.56,.64,1)'; }
+      if (barBot) { barBot.style.transform = 'translateY(2px)';  barBot.style.transition = 'transform 0.35s cubic-bezier(.34,1.56,.64,1)'; }
+    });
+    logoLink.addEventListener('mouseleave', function () {
+      if (barTop) { barTop.style.transform = ''; }
+      if (barBot) { barBot.style.transform = ''; }
+    });
+  }
+
+})();
+</script>
