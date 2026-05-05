@@ -144,7 +144,28 @@
   selects.forEach(sel => {
     sel.addEventListener('change', () => {
       const chosen = selects.map(s => s.value);
-      applyVariant(findVariantByOptions(chosen));
+      const colorIdx = CONFIG.colorOptionIndex;
+      const isColorDropdown = colorIdx !== undefined && colorIdx !== -1 &&
+                              parseInt(sel.dataset.optionIndex, 10) === colorIdx;
+
+      if (isColorDropdown) {
+        // Image tracks color only — use first variant with this color regardless of size
+        const colorVariant = VARIANTS.find(v => v.options[colorIdx] === chosen[colorIdx])
+                          || findVariantByOptions(chosen);
+        applyVariant(colorVariant);
+      } else {
+        // Non-color option (e.g. size) — update price/cart/URL, leave image unchanged
+        const variant = findVariantByOptions(chosen);
+        if (!variant) return;
+        if (variantIdSel) variantIdSel.value = variant.id;
+        if (priceEl) priceEl.textContent = variant.price;
+        if (addToCartBtn) {
+          addToCartBtn.disabled = !variant.available;
+          addToCartBtn.textContent = variant.available ? 'Add to Cart' : 'Sold Out';
+        }
+        document.dispatchEvent(new CustomEvent('variant:change', { detail: { variant } }));
+        history.replaceState(null, '', window.location.pathname + '?variant=' + variant.id);
+      }
     });
   });
 
