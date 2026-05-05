@@ -17,16 +17,35 @@
       </div>
 
       {%- comment -%}
-        Each thumbnail carries data-image-url (full-size) and data-variant-id
-        (the variant that "owns" this image, or blank for unlinked images).
-        JS reads these attributes — no inline onclick with URL params.
+        Each thumbnail carries:
+          data-image-url  — full-size URL for display
+          data-media-id   — Shopify image ID for reliable matching
+          data-variant-id — variant that "owns" this image (blank if shared)
+          data-color      — downcased Color option value of the owning variant
+                            (blank if the image is not linked to any color variant)
+        JS reads these to filter the gallery when a color is selected.
       {%- endcomment -%}
+
+      {%- comment -%} Find the Color option index once (case-insensitive) {%- endcomment -%}
+      {%- assign color_option_index = -1 -%}
+      {%- for opt in product.options -%}
+        {%- assign opt_lower = opt | downcase -%}
+        {%- if opt_lower == 'color' or opt_lower == 'colour' -%}
+          {%- assign color_option_index = forloop.index0 -%}
+        {%- endif -%}
+      {%- endfor -%}
+
       <div class="thumbnails flex gap-3 mt-4 overflow-x-auto pb-2" id="thumbnail-strip">
         {% for image in product.images %}
           {%- assign linked_variant_id = '' -%}
+          {%- assign linked_color = '' -%}
           {%- for variant in product.variants -%}
             {%- if variant.featured_image and variant.featured_image.id == image.id -%}
               {%- assign linked_variant_id = variant.id -%}
+              {%- if color_option_index >= 0 -%}
+                {%- assign linked_color = variant.options[color_option_index] | downcase -%}
+              {%- endif -%}
+              {%- break -%}
             {%- endif -%}
           {%- endfor -%}
           <button
@@ -35,7 +54,7 @@
             data-image-url="{{ image | image_url: width: 1000 }}"
             data-media-id="{{ image.id }}"
             data-variant-id="{{ linked_variant_id }}"
-            data-alt="{{ image.alt | escape }}"
+            data-color="{{ linked_color }}"
             aria-label="View image {{ forloop.index }} of {{ product.images.size }}"
           >
             <img src="{{ image | image_url: width: 200 }}" alt="{{ image.alt | escape | default: product.title }}" class="w-full h-full object-cover pointer-events-none">
@@ -85,14 +104,14 @@
           {% endif %}
         </div>
 
-        {%- comment -%} Hidden master variant selector Shopify processes on form submit {%- endcomment -%}
+        {%- comment -%} Hidden master variant selector — Shopify processes this on form submit {%- endcomment -%}
         <select name="id" id="variant-id" class="hidden" aria-hidden="true">
           {% for variant in product.variants %}
             <option
               value="{{ variant.id }}"
               data-price="{{ variant.price | money }}"
               data-price-raw="{{ variant.price }}"
-              data-image="{{ variant.featured_media | image_url: width: 1000 | default: variant.featured_image | image_url: width: 1000 }}"
+              data-image="{{ variant.featured_image | image_url: width: 1000 }}"
               data-available="{{ variant.available }}"
               {% if variant == product.selected_or_first_available_variant %}selected="selected"{% endif %}
             >{{ variant.title }}</option>
@@ -170,8 +189,8 @@
       "title": {{ variant.title | json }},
       "price": {{ variant.price | money | json }},
       "available": {{ variant.available | json }},
-      "image": {{ variant.featured_media | image_url: width: 1000 | default: variant.featured_image | image_url: width: 1000 | json }},
-      "mediaId": {{ variant.featured_media.id | default: variant.featured_image.id | json }},
+      "image": {{ variant.featured_image | image_url: width: 1000 | json }},
+      "mediaId": {{ variant.featured_image.id | json }},
       "options": [{% for opt in variant.options %}{{ opt | json }}{% unless forloop.last %},{% endunless %}{% endfor %}]
     }{% unless forloop.last %},{% endunless %}
     {% endfor %}

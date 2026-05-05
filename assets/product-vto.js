@@ -67,31 +67,33 @@
       window.currentVtoImage = imageUrl; // Sync to global state for other components
     }
 
-    // --- Gallery Filtering (Requirement: Show ONLY images for this color) ---
+    // --- Gallery Filtering: show images for the selected color only ---
+    // data-color is set by Liquid to the downcased Color option value of the
+    // variant that owns each image. Images with no data-color are shared/generic
+    // and are always shown regardless of which color is selected.
     const colorIndex = CONFIG.colorOptionIndex;
-    const selectedColor = (colorIndex !== -1 && variant.options[colorIndex]) 
-      ? variant.options[colorIndex].toLowerCase() 
+    const selectedColor = (colorIndex !== undefined && colorIndex !== -1 && variant.options[colorIndex])
+      ? variant.options[colorIndex].toLowerCase()
       : null;
 
     let matchCount = 0;
     thumbnails.forEach(thumb => {
-      const thumbVariantId = thumb.dataset.variantId;
-      const thumbAlt = (thumb.dataset.alt || '').toLowerCase();
-      
-      const isIdMatch = thumbVariantId && thumbVariantId === String(variant.id);
-      const isColorMatch = selectedColor && (thumbAlt.includes(selectedColor) || thumbAlt === selectedColor);
-      
-      if (isIdMatch || isColorMatch) {
+      const thumbColor = (thumb.dataset.color || '').toLowerCase();
+      const isColorSpecific = thumbColor !== '';
+
+      if (!isColorSpecific || !selectedColor || thumbColor === selectedColor) {
+        // Show: generic images always; color images when they match
         thumb.classList.remove('hidden');
-        matchCount++;
+        if (isColorSpecific) matchCount++;
       } else {
         thumb.classList.add('hidden');
       }
     });
 
-    // If no images match this variant, show the first one as an absolute fallback
-    if (matchCount === 0 && thumbnails.length > 0) {
-      thumbnails[0].classList.remove('hidden');
+    // Absolute fallback: if all color images were hidden (e.g. data-color not set),
+    // un-hide everything so the gallery is never empty
+    if (matchCount === 0 && selectedColor) {
+      thumbnails.forEach(t => t.classList.remove('hidden'));
     }
 
     // Dispatch custom event for external listeners and internal sync
