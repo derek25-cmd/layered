@@ -77,72 +77,64 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Product Pages — Mobile-First Layout ──────────────────────────────────── */
+/* ── SPA Product Detail Page (/product/:handle) — Mobile-First Layout ─────── */
 
-/* Shared: main product image — never crop, always full width */
-#main-product-image,
-.product-page img#main-product-image {
-  width: 100%;
-  height: auto;
+/* Scoped to .product-detail-page added by the aG React component */
+
+/* Main image: full width, never cropped, natural height */
+.product-detail-page .aspect-\[3\/4\] img {
   object-fit: contain;
-  display: block;
 }
 
-/* Native product template (.product-layout is the grid wrapper) */
-@media (max-width: 768px) {
-  .product-layout {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  /* Images always above details on mobile */
-  .product-layout .product-images  { order: 0; }
-  .product-layout .product-details { order: 1; }
-}
-
-/* SPA product page — image container fills column width */
-.product-page .product-images,
-.product-images {
+/* Image column: always full width, no overflow */
+.product-detail-page > .grid > div:first-child {
   width: 100%;
   min-width: 0;
 }
 
-/* Variant selector labels — subtle uppercase style */
-.product-page label[for^="Option"],
-.variant-label {
-  font-size: 0.7rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: #6b7280;
+/* Info column: sensible mobile top gap */
+.product-detail-page > .grid > div:last-child {
+  min-width: 0;
 }
 
-/* Variant dropdowns — full width, consistent height */
-.variant-select {
+/* Variant option label — subtle uppercase */
+.product-detail-page p.text-xs.uppercase {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+}
+
+/* Variant select dropdown — fill width, comfortable tap target */
+.product-detail-page select {
   width: 100%;
   min-height: 2.75rem;
   font-size: 0.875rem;
 }
 
-/* Thumbnail strip — horizontal scroll without overflow clipping */
-#thumbnail-strip {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
+/* Variant pill buttons — wrap cleanly on narrow screens */
+.product-detail-page .flex.flex-wrap {
+  row-gap: 0.5rem;
+}
+
+/* Thumbnail strip — horizontal scroll, hidden scrollbar */
+.product-detail-page .flex.overflow-x-auto {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
+.product-detail-page .flex.overflow-x-auto::-webkit-scrollbar { display: none; }
 
-#thumbnail-strip::-webkit-scrollbar { display: none; }
-
-/* Add-to-cart button — full width on mobile */
-@media (max-width: 640px) {
-  #add-to-cart-btn {
+/* Action buttons row — stack on very small screens */
+@media (max-width: 480px) {
+  .product-detail-page .flex.flex-col.sm\:flex-row {
+    flex-direction: column;
+  }
+  .product-detail-page .flex.flex-col.sm\:flex-row > * {
     width: 100%;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    font-size: 1rem;
+  }
+}
+
+/* Grid: single column on mobile, 2-column on lg */
+@media (max-width: 1023px) {
+  .product-detail-page > .grid {
+    grid-template-columns: 1fr;
   }
 }
