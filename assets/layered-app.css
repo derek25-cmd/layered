@@ -76,3 +76,73 @@
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Product Pages — Mobile-First Layout ──────────────────────────────────── */
+
+/* Shared: main product image — never crop, always full width */
+#main-product-image,
+.product-page img#main-product-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Native product template (.product-layout is the grid wrapper) */
+@media (max-width: 768px) {
+  .product-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* Images always above details on mobile */
+  .product-layout .product-images  { order: 0; }
+  .product-layout .product-details { order: 1; }
+}
+
+/* SPA product page — image container fills column width */
+.product-page .product-images,
+.product-images {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Variant selector labels — subtle uppercase style */
+.product-page label[for^="Option"],
+.variant-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* Variant dropdowns — full width, consistent height */
+.variant-select {
+  width: 100%;
+  min-height: 2.75rem;
+  font-size: 0.875rem;
+}
+
+/* Thumbnail strip — horizontal scroll without overflow clipping */
+#thumbnail-strip {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+#thumbnail-strip::-webkit-scrollbar { display: none; }
+
+/* Add-to-cart button — full width on mobile */
+@media (max-width: 640px) {
+  #add-to-cart-btn {
+    width: 100%;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    font-size: 1rem;
+  }
+}

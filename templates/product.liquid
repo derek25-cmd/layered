@@ -3,16 +3,16 @@
 {%- endcomment -%}
 
 <div class="product-page container mx-auto py-6 md:py-12 px-4 max-w-6xl">
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+  <div class="product-layout grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
 
     <!-- Product Images -->
     <div class="product-images">
-      <div class="main-image bg-gray-100 rounded-lg overflow-hidden aspect-[3/4]">
+      <div class="main-image bg-gray-50 rounded-lg overflow-hidden">
         <img
           id="main-product-image"
           src="{{ product.selected_or_first_available_variant.featured_image | default: product.featured_image | image_url: width: 1000 }}"
           alt="{{ product.title }}"
-          class="w-full h-full object-cover transition-opacity duration-200"
+          class="w-full h-auto object-contain block transition-opacity duration-200"
         >
       </div>
 
@@ -64,17 +64,17 @@
     </div>
 
     <!-- Product Info & Variant Selectors -->
-    <div class="product-details flex flex-col">
-      <h1 class="text-2xl sm:text-3xl md:text-4xl font-display font-bold mb-2">{{ product.title }}</h1>
+    <div class="product-details flex flex-col gap-1">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-3 leading-tight">{{ product.title }}</h1>
       <p
         id="product-price"
-        class="text-xl md:text-2xl font-medium text-gray-700 mb-4 md:mb-6"
+        class="text-2xl md:text-3xl font-medium text-gray-800 mb-5 md:mb-7"
         data-product-price
       >
         {{ product.selected_or_first_available_variant.price | money }}
       </p>
 
-      <div class="product-description text-gray-600 leading-relaxed mb-8">
+      <div class="product-description text-gray-600 leading-relaxed mb-8 text-base md:text-lg">
         {{ product.description }}
       </div>
 
