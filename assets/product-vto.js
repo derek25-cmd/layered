@@ -105,24 +105,6 @@
     highlightThumbnailByMediaId(variant.mediaId, imageUrl);
   }
 
-  // --- Event: Listen for Variant Changes (Requirement 1 & 2) ---
-  document.addEventListener('variant:change', (event) => {
-    const variant = event.detail.variant;
-    if (!variant) return;
-
-    // Prioritize variant's specific media/image over defaults
-    const imageUrl = variant.image || (variant.featured_media ? variant.featured_media.preview_image.src : null);
-    
-    if (imageUrl) {
-      currentVtoImage = imageUrl;
-      // Sync gallery if needed (prevents mismatch)
-      if (mainImage && mainImage.src !== imageUrl) setMainImage(imageUrl);
-      
-      const mediaId = variant.mediaId || (variant.featured_media ? variant.featured_media.id : null);
-      highlightThumbnailByMediaId(mediaId, imageUrl);
-    }
-  });
-
   function setMainImage(url) {
     if (!url || !mainImage) return;
     mainImage.style.opacity = '0.6';
