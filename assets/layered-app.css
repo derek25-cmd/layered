@@ -6,75 +6,84 @@
 [data-state='open'] > [role='dialog'], .DialogContent, .modal-content { max-height: 90vh !important; overflow-y: auto !important; overscroll-behavior: contain; }
 
 /* Pro Member Discount Styles - Premium Refinement */
+/* ── Pro Discount — price display ─────────────────────────────────────────── */
 .pro-discount-wrap {
   display: inline-flex !important;
   align-items: baseline !important;
-  gap: 0.5rem !important;
+  gap: 0.375rem !important;
 }
 
 .pro-original {
   color: hsl(var(--muted-foreground)) !important;
   text-decoration: line-through !important;
-  font-size: 0.85em !important;
+  font-size: 0.8em !important;
   font-weight: 400 !important;
-  opacity: 0.7;
 }
 
 .pro-discounted {
-  color: #16a34a !important; /* Professional Green */
+  color: #15803d !important;
   font-weight: 600 !important;
 }
 
+/* ── Pro Discount — savings row in cart summary ────────────────────────────── */
 .pro-savings-line {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   width: 100%;
-  color: #16a34a;
-  font-size: 0.875rem;
-  margin: 12px 0;
-  font-weight: 600;
-  padding: 10px 0;
-  border-top: 1px solid hsl(var(--border));
-  border-bottom: 1px solid hsl(var(--border));
-  animation: pro-fade-in 0.4s ease-out;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #15803d;
+  padding: 0.625rem 0.75rem;
+  margin: 0.5rem 0;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  animation: pro-fade-in 0.3s ease-out;
 }
 
+/* ── Pro Discount — checkout banner ───────────────────────────────────────── */
 .pro-checkout-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1rem;
   background: #f0fdf4;
   border: 1px solid #bbf7d0;
   border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
   color: #166534;
-  font-size: 0.875rem;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.05);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  animation: pro-fade-in 0.3s ease-out;
 }
 
 .pro-checkout-notice-icon {
-  background: #16a34a;
-  color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 14px;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: #15803d;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.75rem;
+  margin-top: 1px;
 }
 
 .pro-checkout-notice-content b {
   display: block;
-  font-size: 0.95rem;
-  margin-bottom: 2px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: 1px;
+  color: #14532d;
 }
 
 @keyframes pro-fade-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── SPA Product Detail Page (/product/:handle) — Mobile-First Layout ─────── */
@@ -137,4 +146,40 @@
   .product-detail-page > .grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── Scrollable variant listbox (shown when option has 7+ values) ─────────── */
+.variant-scrollable-select {
+  display: block;
+  width: 100%;
+  overflow-y: auto;
+  max-height: 220px;
+  border: 1px solid hsl(var(--foreground) / 0.2);
+  background: transparent;
+  font-size: 0.875rem;
+  outline: none;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--foreground) / 0.25) transparent;
+  transition: border-color 0.15s;
+}
+.variant-scrollable-select:focus {
+  border-color: hsl(var(--foreground));
+}
+.variant-scrollable-select option {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+.variant-scrollable-select option:checked {
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  font-weight: 600;
+}
+.variant-scrollable-select::-webkit-scrollbar {
+  width: 5px;
+}
+.variant-scrollable-select::-webkit-scrollbar-thumb {
+  background: hsl(var(--foreground) / 0.2);
+  border-radius: 3px;
 }
