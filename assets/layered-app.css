@@ -183,3 +183,52 @@
   background: hsl(var(--foreground) / 0.2);
   border-radius: 3px;
 }
+
+/* ── Product description HTML formatting ──────────────────────────────────── */
+.product-description-html { color: hsl(var(--muted-foreground)); }
+
+.product-description-html p { margin-bottom: 0.875rem; line-height: 1.7; }
+.product-description-html p:last-child { margin-bottom: 0; }
+
+.product-description-html ul,
+.product-description-html ol {
+  margin: 0.75rem 0 0.875rem 1.25rem;
+  line-height: 1.7;
+}
+.product-description-html ul { list-style: disc; }
+.product-description-html ol { list-style: decimal; }
+.product-description-html li { margin-bottom: 0.3rem; }
+
+.product-description-html h1,
+.product-description-html h2,
+.product-description-html h3,
+.product-description-html h4 {
+  font-family: var(--font-display, serif);
+  color: hsl(var(--foreground));
+  font-weight: 600;
+  margin: 1.25rem 0 0.5rem;
+  line-height: 1.3;
+}
+.product-description-html h1 { font-size: 1.125rem; }
+.product-description-html h2 { font-size: 1rem; }
+.product-description-html h3,
+.product-description-html h4 { font-size: 0.9375rem; }
+
+.product-description-html strong,
+.product-description-html b { font-weight: 600; color: hsl(var(--foreground)); }
+
+.product-description-html em,
+.product-description-html i { font-style: italic; }
+
+.product-description-html a {
+  color: hsl(var(--foreground));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.product-description-html a:hover { opacity: 0.7; }
+
+.product-description-html hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border));
+  margin: 1rem 0;
+}
